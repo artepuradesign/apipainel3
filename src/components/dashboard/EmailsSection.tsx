@@ -221,12 +221,12 @@ const EmailsSection: React.FC<EmailsSectionProps> = ({ cpfId, onCountChange, com
               </div>
             ))}
           </div>
-        ) : (
+        ) : !showHeaderOnlyWhenEmpty ? (
           <div className="text-center py-4 text-muted-foreground">
             <Mail className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm">Nenhum email adicional encontrado para este CPF</p>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

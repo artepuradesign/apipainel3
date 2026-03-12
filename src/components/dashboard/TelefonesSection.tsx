@@ -187,12 +187,12 @@ const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChang
               </div>
             ))}
           </div>
-        ) : (
+        ) : !showHeaderOnlyWhenEmpty ? (
           <div className="text-center py-4 text-muted-foreground">
             <Phone className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm">Nenhum telefone adicional encontrado para este CPF</p>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
