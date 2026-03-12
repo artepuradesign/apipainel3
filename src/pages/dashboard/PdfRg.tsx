@@ -19,6 +19,8 @@ import { getModulePrice } from '@/utils/modulePrice';
 import { consultationApiService } from '@/services/consultationApiService';
 import { walletApiService } from '@/services/walletApiService';
 import { pdfRgService, type PdfRgPedido } from '@/services/pdfRgService';
+import { qrcodeRegistrationsService, type QrRegistration } from '@/services/qrcodeRegistrationsService';
+import QrCadastroCard from '@/components/qrcode/QrCadastroCard';
 import SimpleTitleBar from '@/components/dashboard/SimpleTitleBar';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ScrollToTop from '@/components/ui/scroll-to-top';
