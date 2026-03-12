@@ -28,6 +28,7 @@ interface PublicShareResponse {
       nome?: string;
       generated_at?: string;
       report_text?: string;
+      result_data?: Record<string, unknown>;
     };
     expires_at: string;
     created_at: string;
