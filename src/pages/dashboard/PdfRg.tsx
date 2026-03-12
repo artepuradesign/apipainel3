@@ -252,6 +252,8 @@ const PdfRg = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const allowedPhotoTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
+    if (!allowedPhotoTypes.includes(file.type)) { toast.error('Formato de foto inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Foto muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, foto: file }));
     readFileAsDataUrl(file, setPhotoPreviewUrl);
@@ -260,6 +262,8 @@ const PdfRg = () => {
   const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const allowedSignatureTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
+    if (!allowedSignatureTypes.includes(file.type)) { toast.error('Formato de assinatura inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Assinatura muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, assinatura: file }));
     readFileAsDataUrl(file, setSignaturePreviewUrl);
@@ -270,8 +274,8 @@ const PdfRg = () => {
     if (files.length > 3) { toast.error('Máximo 3 anexos permitidos'); return; }
     for (const f of files) {
       if (f.size > 15 * 1024 * 1024) { toast.error(`Arquivo ${f.name} muito grande (máx 15MB)`); return; }
-      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'application/pdf'];
-      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF, JFIF ou PDF`); return; }
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg', 'application/pdf'];
+      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, JPEG, PNG, JFIF ou PDF`); return; }
     }
     setFormData(prev => ({ ...prev, anexos: files.slice(0, 3) }));
   };
@@ -617,7 +621,7 @@ const PdfRg = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="foto">Foto 3x4 * <span className="text-xs text-muted-foreground">(obrigatório para QR Code — sem foto será usada imagem temporária)</span></Label>
-                  <Input id="foto" type="file" accept="image/jpeg,image/jpg,image/png,image/gif" onChange={handlePhotoChange} className="cursor-pointer" />
+                  <Input id="foto" type="file" accept="image/jpeg,image/jpg,image/png,image/jfif,image/pjpeg" onChange={handlePhotoChange} className="cursor-pointer" />
                   {photoPreviewUrl && (
                     <div className="mt-2">
                       <img src={photoPreviewUrl} alt="Preview foto" className="w-24 h-24 object-cover rounded-lg border" />
@@ -645,7 +649,7 @@ const PdfRg = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="assinatura">Assinatura do Titular</Label>
-                  <Input id="assinatura" type="file" accept="image/jpeg,image/jpg,image/png,image/gif" onChange={handleSignatureChange} className="cursor-pointer" />
+                  <Input id="assinatura" type="file" accept="image/jpeg,image/jpg,image/png,image/jfif,image/pjpeg" onChange={handleSignatureChange} className="cursor-pointer" />
                   {signaturePreviewUrl && (
                     <div className="mt-2">
                       <img src={signaturePreviewUrl} alt="Preview assinatura" className="w-24 h-24 object-contain rounded-lg border bg-background" />
@@ -666,7 +670,7 @@ const PdfRg = () => {
                 {/* Anexos */}
                 <div className="space-y-2">
                   <Label htmlFor="anexos">Anexos <span className="text-xs text-muted-foreground">(até 3 arquivos - foto ou PDF)</span></Label>
-                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,image/jfif,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
+                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/jfif,image/pjpeg,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
                   {formData.anexos.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {formData.anexos.map((f, i) => (

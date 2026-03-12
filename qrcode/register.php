@@ -59,14 +59,14 @@ if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
 }
 
 $photo = $_FILES['photo'];
-$allowed_ext  = ['jpg', 'jpeg', 'png', 'gif', 'jfif'];
-$allowed_mime = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'image/pjpeg'];
+$allowed_ext  = ['jpg', 'jpeg', 'png', 'jfif'];
+$allowed_mime = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
 
 $file_ext = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
 
 if (!in_array($photo['type'], $allowed_mime) || !in_array($file_ext, $allowed_ext)) {
     http_response_code(400);
-    echo json_encode(["error" => "Formato inválido. Use apenas JPG, PNG ou GIF."]);
+    echo json_encode(["error" => "Formato inválido. Use apenas JPG, JPEG, PNG ou JFIF."]);
     exit;
 }
 
