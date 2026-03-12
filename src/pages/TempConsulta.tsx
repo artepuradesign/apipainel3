@@ -131,11 +131,11 @@ const TempConsulta = () => {
   const hasCpfValue = hasValue(sharedResult?.cpf);
 
   const auxiliosEmergenciais = useMemo(
-    () => parseArrayData(sharedResult?.auxilio_emergencial),
+    () => parseArrayData<BaseAuxilioEmergencial>(sharedResult?.auxilio_emergencial),
     [sharedResult?.auxilio_emergencial]
   );
 
-  const raisData = useMemo(() => parseArrayData(sharedResult?.rais_historico), [sharedResult?.rais_historico]);
+  const raisData = useMemo(() => parseArrayData<BaseRais>(sharedResult?.rais_historico), [sharedResult?.rais_historico]);
 
   const scoreData = useMemo(() => {
     const score = Number(sharedResult?.score || 0);
