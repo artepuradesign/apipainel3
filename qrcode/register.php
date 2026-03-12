@@ -66,7 +66,7 @@ $file_ext = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
 
 if (!in_array($photo['type'], $allowed_mime) || !in_array($file_ext, $allowed_ext)) {
     http_response_code(400);
-    echo json_encode(["error" => "Formato inválido. Use apenas JPG, JPEG, PNG ou JFIF."]);
+    echo json_encode(["error" => "Formato inválido. Use apenas JPG, PNG ou GIF."]);
     exit;
 }
 

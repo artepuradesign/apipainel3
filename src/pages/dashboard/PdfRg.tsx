@@ -645,7 +645,7 @@ const PdfRg = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="assinatura">Assinatura do Titular</Label>
-                  <Input id="assinatura" type="file" accept="image/jpeg,image/jpg,image/png,image/jfif,image/pjpeg" onChange={handleSignatureChange} className="cursor-pointer" />
+                  <Input id="assinatura" type="file" accept="image/jpeg,image/jpg,image/png,image/gif" onChange={handleSignatureChange} className="cursor-pointer" />
                   {signaturePreviewUrl && (
                     <div className="mt-2">
                       <img src={signaturePreviewUrl} alt="Preview assinatura" className="w-24 h-24 object-contain rounded-lg border bg-background" />
