@@ -199,6 +199,7 @@ class FileUpload {
             'pdf'  => 'application/pdf',
             'jpg'  => 'image/jpeg',
             'jpeg' => 'image/jpeg',
+            'jfif' => 'image/jpeg',
             'png'  => 'image/png',
             'gif'  => 'image/gif',
         ];
