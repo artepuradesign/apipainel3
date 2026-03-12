@@ -59,8 +59,8 @@ if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
 }
 
 $photo = $_FILES['photo'];
-$allowed_ext  = ['jpg', 'jpeg', 'png', 'gif', 'jfif'];
-$allowed_mime = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'image/pjpeg'];
+$allowed_ext  = ['jpg', 'jpeg', 'png', 'jfif'];
+$allowed_mime = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
 
 $file_ext = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
 

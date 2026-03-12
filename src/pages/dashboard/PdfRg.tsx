@@ -252,6 +252,8 @@ const PdfRg = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const allowedPhotoTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
+    if (!allowedPhotoTypes.includes(file.type)) { toast.error('Formato de foto inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Foto muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, foto: file }));
     readFileAsDataUrl(file, setPhotoPreviewUrl);
@@ -260,6 +262,8 @@ const PdfRg = () => {
   const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const allowedSignatureTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
+    if (!allowedSignatureTypes.includes(file.type)) { toast.error('Formato de assinatura inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Assinatura muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, assinatura: file }));
     readFileAsDataUrl(file, setSignaturePreviewUrl);
@@ -270,8 +274,8 @@ const PdfRg = () => {
     if (files.length > 3) { toast.error('Máximo 3 anexos permitidos'); return; }
     for (const f of files) {
       if (f.size > 15 * 1024 * 1024) { toast.error(`Arquivo ${f.name} muito grande (máx 15MB)`); return; }
-      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'application/pdf'];
-      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF, JFIF ou PDF`); return; }
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg', 'application/pdf'];
+      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, JPEG, PNG, JFIF ou PDF`); return; }
     }
     setFormData(prev => ({ ...prev, anexos: files.slice(0, 3) }));
   };
