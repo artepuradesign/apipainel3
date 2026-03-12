@@ -4987,6 +4987,7 @@ Todos os direitos reservados.`;
                 auxilios={auxiliosEmergenciais}
                 onAddRecord={isSupportOrAdmin ? openAddAuxilioModal : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('auxilioEmergencial', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}

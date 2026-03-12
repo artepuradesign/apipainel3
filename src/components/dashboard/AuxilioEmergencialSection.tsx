@@ -129,12 +129,14 @@ export const AuxilioEmergencialSection = ({ auxilios, onEdit, onEditRecord, onAd
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <HandCoins className="h-12 w-12 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">Nenhum registro encontrado</p>
-          </div>
-        </CardContent>
+        {!showHeaderOnlyWhenEmpty ? (
+          <CardContent>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <HandCoins className="h-12 w-12 text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">Nenhum registro encontrado</p>
+            </div>
+          </CardContent>
+        ) : null}
       </Card>
     );
   }
