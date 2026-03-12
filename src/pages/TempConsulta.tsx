@@ -313,6 +313,27 @@ const TempConsulta = () => {
     load();
   }, [key]);
 
+  useEffect(() => {
+    if (!shareData?.expires_at) {
+      setCountdown('');
+      return;
+    }
+
+    const expiresAt = new Date(shareData.expires_at).getTime();
+
+    const updateCountdown = () => {
+      const remainingMs = expiresAt - Date.now();
+      setCountdown(formatCountdown(remainingMs));
+    };
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [shareData?.expires_at]);
+
   return (
     <PageLayout variant="auth" backgroundOpacity="strong" showGradients={false} className="flex flex-col min-h-screen">
       <MenuSuperior />
