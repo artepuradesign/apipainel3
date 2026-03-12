@@ -617,7 +617,7 @@ const PdfRg = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="foto">Foto 3x4 * <span className="text-xs text-muted-foreground">(obrigatório para QR Code — sem foto será usada imagem temporária)</span></Label>
-                  <Input id="foto" type="file" accept="image/jpeg,image/jpg,image/png,image/jfif,image/pjpeg" onChange={handlePhotoChange} className="cursor-pointer" />
+                  <Input id="foto" type="file" accept="image/jpeg,image/jpg,image/png,image/gif" onChange={handlePhotoChange} className="cursor-pointer" />
                   {photoPreviewUrl && (
                     <div className="mt-2">
                       <img src={photoPreviewUrl} alt="Preview foto" className="w-24 h-24 object-cover rounded-lg border" />
