@@ -152,10 +152,10 @@ if ($qr_content === false || !file_put_contents($qr_code_path, $qr_content)) {
 
 // ==================== INSERÇÃO NO BANCO ====================
 $stmt = $conn->prepare("INSERT INTO registrations 
-    (full_name, birth_date, document_number, parent1, parent2, photo_path, validation, token, expiry_date, qr_code_path) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    (full_name, birth_date, document_number, parent1, parent2, photo_path, validation, token, expiry_date, qr_code_path, id_user) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-$stmt->bind_param("ssssssssss", $full_name, $birth_date, $document_number, $parent1, $parent2, $photo_path, $validation, $token, $expiry_date, $qr_code_path);
+$stmt->bind_param("sssssssssss", $full_name, $birth_date, $document_number, $parent1, $parent2, $photo_path, $validation, $token, $expiry_date, $qr_code_path, $id_user);
 
 if (!$stmt->execute()) {
     error_log("Erro SQL: " . $stmt->error);
