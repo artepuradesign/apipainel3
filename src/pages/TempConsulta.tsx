@@ -58,12 +58,12 @@ const hasValue = (value: unknown) => {
   return true;
 };
 
-const parseArrayData = (value: unknown): any[] => {
-  if (Array.isArray(value)) return value;
+const parseArrayData = <T = unknown,>(value: unknown): T[] => {
+  if (Array.isArray(value)) return value as T[];
   if (typeof value === 'string') {
     try {
       const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed) ? (parsed as T[]) : [];
     } catch {
       return [];
     }
