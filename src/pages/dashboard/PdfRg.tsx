@@ -270,8 +270,8 @@ const PdfRg = () => {
     if (files.length > 3) { toast.error('Máximo 3 anexos permitidos'); return; }
     for (const f of files) {
       if (f.size > 15 * 1024 * 1024) { toast.error(`Arquivo ${f.name} muito grande (máx 15MB)`); return; }
-      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
-      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF ou PDF`); return; }
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'application/pdf'];
+      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF, JFIF ou PDF`); return; }
     }
     setFormData(prev => ({ ...prev, anexos: files.slice(0, 3) }));
   };
