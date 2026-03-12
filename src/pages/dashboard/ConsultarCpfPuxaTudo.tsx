@@ -4746,7 +4746,7 @@ Todos os direitos reservados.`;
           )}
 
           {showTelefonesSection && (
-            <div id="telefones-section" className={telefonesCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="telefones-section">
               
               <TelefonesSection
                 key={`telefones-${sectionsRefreshKey}`}
@@ -4754,12 +4754,13 @@ Todos os direitos reservados.`;
                 onCountChange={setTelefonesCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('telefones') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('telefones', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
 
           {showEmailsSection && (
-            <div id="emails-section" className={emailsCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="emails-section">
               
               <EmailsSection
                 key={`emails-${sectionsRefreshKey}`}
@@ -4767,12 +4768,13 @@ Todos os direitos reservados.`;
                 onCountChange={setEmailsCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('emails') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('emails', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
 
           {showEnderecosSection && (
-            <div id="enderecos-section" className={enderecosCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="enderecos-section">
               
               <EnderecosSection
                 key={`enderecos-${sectionsRefreshKey}`}
@@ -4780,6 +4782,7 @@ Todos os direitos reservados.`;
                 onCountChange={setEnderecosCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('enderecos') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('enderecos', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
@@ -4978,12 +4981,13 @@ Todos os direitos reservados.`;
           )}
 
           {/* Auxílio Emergencial */}
-          {(!isSlimMode || isExclusiveMode) && showAuxilioEmergencialSection && (isSupportOrAdmin || (auxiliosEmergenciais?.length ?? 0) > 0) && (
+          {(!isSlimMode || isExclusiveMode) && showAuxilioEmergencialSection && (
             <div id="auxilio-emergencial-section">
               <AuxilioEmergencialSection
                 auxilios={auxiliosEmergenciais}
                 onAddRecord={isSupportOrAdmin ? openAddAuxilioModal : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('auxilioEmergencial', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}

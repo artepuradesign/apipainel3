@@ -13,9 +13,10 @@ interface AuxilioEmergencialSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseAuxilioEmergencial) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-export const AuxilioEmergencialSection = ({ auxilios, onEdit, onEditRecord, onAddRecord }: AuxilioEmergencialSectionProps) => {
+export const AuxilioEmergencialSection = ({ auxilios, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }: AuxilioEmergencialSectionProps) => {
   const hasData = useMemo(() => (auxilios?.length ?? 0) > 0, [auxilios?.length]);
   const sectionCardClass = useMemo(
     () => (hasData ? 'border-success-border bg-success-subtle' : undefined),
@@ -111,18 +112,31 @@ export const AuxilioEmergencialSection = ({ auxilios, onEdit, onEditRecord, onAd
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
+              {onAddRecord ? (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onAddRecord}
+                  className="h-8 w-8 rounded-full"
+                  title="Adicionar novo registro"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              ) : null}
               <Badge variant="secondary" className="uppercase tracking-wide">
                 Online
               </Badge>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <HandCoins className="h-12 w-12 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">Nenhum registro encontrado</p>
-          </div>
-        </CardContent>
+        {!showHeaderOnlyWhenEmpty ? (
+          <CardContent>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <HandCoins className="h-12 w-12 text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">Nenhum registro encontrado</p>
+            </div>
+          </CardContent>
+        ) : null}
       </Card>
     );
   }

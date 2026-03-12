@@ -24,9 +24,10 @@ interface TelefonesSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseTelefone) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord }) => {
+const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }) => {
   const { isLoading, getTelefonesByCpfId } = useBaseTelefone();
   const [telefones, setTelefones] = useState<BaseTelefone[]>([]);
   const [didLoad, setDidLoad] = useState(false);
@@ -186,12 +187,12 @@ const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChang
               </div>
             ))}
           </div>
-        ) : (
+        ) : !showHeaderOnlyWhenEmpty ? (
           <div className="text-center py-4 text-muted-foreground">
             <Phone className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm">Nenhum telefone adicional encontrado para este CPF</p>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

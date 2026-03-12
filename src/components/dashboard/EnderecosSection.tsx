@@ -14,9 +14,10 @@ interface EnderecosSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseEndereco) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-const EnderecosSection: React.FC<EnderecosSectionProps> = ({ cpfId, onCountChange, onEdit, onEditRecord, onAddRecord }) => {
+const EnderecosSection: React.FC<EnderecosSectionProps> = ({ cpfId, onCountChange, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }) => {
   const { isLoading, getEnderecosByCpfId } = useBaseEndereco();
   const [enderecos, setEnderecos] = useState<BaseEndereco[]>([]);
   const [didLoad, setDidLoad] = useState(false);
@@ -176,12 +177,12 @@ const EnderecosSection: React.FC<EnderecosSectionProps> = ({ cpfId, onCountChang
               </div>
             ))}
           </div>
-        ) : (
+        ) : !showHeaderOnlyWhenEmpty ? (
           <div className="text-center py-4 text-muted-foreground">
             <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm">Nenhum endereço adicional encontrado para este CPF</p>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
