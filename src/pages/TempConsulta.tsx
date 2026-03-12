@@ -132,6 +132,7 @@ const TempConsulta = () => {
   const [senhaCpfCount, setSenhaCpfCount] = useState(0);
   const [gestaoCount, setGestaoCount] = useState(0);
   const [boCount, setBoCount] = useState(0);
+  const [countdown, setCountdown] = useState('');
 
   const key = useMemo(() => extractShareKey(search), [search]);
   const sharedPayload = shareData?.payload;
