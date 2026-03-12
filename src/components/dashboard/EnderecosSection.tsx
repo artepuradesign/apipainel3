@@ -14,9 +14,10 @@ interface EnderecosSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseEndereco) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-const EnderecosSection: React.FC<EnderecosSectionProps> = ({ cpfId, onCountChange, onEdit, onEditRecord, onAddRecord }) => {
+const EnderecosSection: React.FC<EnderecosSectionProps> = ({ cpfId, onCountChange, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }) => {
   const { isLoading, getEnderecosByCpfId } = useBaseEndereco();
   const [enderecos, setEnderecos] = useState<BaseEndereco[]>([]);
   const [didLoad, setDidLoad] = useState(false);

@@ -17,9 +17,10 @@ interface EmailsSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseEmail) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-const EmailsSection: React.FC<EmailsSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord }) => {
+const EmailsSection: React.FC<EmailsSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }) => {
   const { isLoading, getEmailsByCpfId } = useBaseEmail();
   const [emails, setEmails] = useState<BaseEmail[]>([]);
   const [didLoad, setDidLoad] = useState(false);
