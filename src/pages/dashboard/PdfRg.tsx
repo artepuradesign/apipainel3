@@ -225,7 +225,8 @@ const PdfRg = () => {
     if (!user) return;
     reloadApiBalance();
     loadMeusPedidos();
-  }, [user, reloadApiBalance, loadMeusPedidos]);
+    loadMeusCadastrosQr();
+  }, [user, reloadApiBalance, loadMeusPedidos, loadMeusCadastrosQr]);
 
   useEffect(() => { if (user) loadModulePrice(); }, [user, loadModulePrice]);
 
