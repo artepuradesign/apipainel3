@@ -84,6 +84,8 @@ const PdfRg = () => {
   const [pedidosLoading, setPedidosLoading] = useState(false);
   const [pedidoDetalhe, setPedidoDetalhe] = useState<PdfRgPedido | null>(null);
   const [showDetalheModal, setShowDetalheModal] = useState(false);
+  const [meusCadastrosQr, setMeusCadastrosQr] = useState<QrRegistration[]>([]);
+  const [cadastrosQrLoading, setCadastrosQrLoading] = useState(false);
 
   const { balance, loadBalance: reloadApiBalance } = useWalletBalance();
   const {
