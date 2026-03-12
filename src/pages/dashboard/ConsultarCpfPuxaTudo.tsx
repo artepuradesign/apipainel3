@@ -4774,7 +4774,7 @@ Todos os direitos reservados.`;
           )}
 
           {showEnderecosSection && (
-            <div id="enderecos-section" className={enderecosCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="enderecos-section">
               
               <EnderecosSection
                 key={`enderecos-${sectionsRefreshKey}`}
