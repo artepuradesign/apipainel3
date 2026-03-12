@@ -4065,10 +4065,12 @@ Todos os direitos reservados.`;
                   <span className="truncate text-base sm:text-lg">Sucesso</span>
                 </CardTitle>
                  <div className="flex flex-shrink-0 justify-end">
-                   <SectionActionButtons
-                     getText={buildFullReportText}
-                     getWhatsAppShareText={buildTemporaryShareMessage}
-                     filenameBase={`cpf-completo-${result.cpf}-${Date.now()}`}
+                    <SectionActionButtons
+                      getText={buildFullReportText}
+                      getWhatsAppShareText={buildTemporaryShareMessage}
+                      getTemporaryPageShareText={buildTemporaryShareMessage}
+                      filenameBase={`cpf-completo-${result.cpf}-${Date.now()}`}
+
                      pdf={{
                        headerTitle: "APIPAINEL.COM.BR",
                        headerSubtitle: "Relatório Completo de Consulta CPF",
