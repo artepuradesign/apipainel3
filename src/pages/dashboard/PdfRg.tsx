@@ -690,25 +690,32 @@ const PdfRg = () => {
             </CardContent>
           </Card>
 
-          {/* Sidebar - Pedidos + Cadastros QR */}
+          {/* Sidebar - Registro unificado (Pedido + QR) */}
           <div className="space-y-4">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">Meus Pedidos + Meus Cadastros QR</CardTitle>
+                <CardTitle className="text-sm font-semibold">Meus Registros (Pedido + QR)</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Meus Pedidos</p>
-                  {pedidosLoading ? (
-                    <div className="flex items-center justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-                  ) : meusPedidos.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-4">Nenhum pedido encontrado</p>
-                  ) : (
-                    <div className="divide-y rounded-md border max-h-[320px] overflow-y-auto">
-                      {meusPedidos.map((p) => {
-                        const st = STATUS_LABELS[p.status] || STATUS_LABELS['realizado'];
-                        return (
-                          <div key={p.id} className="flex items-center justify-between px-3 py-2.5 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => handleViewPedido(p)}>
+              <CardContent className="p-0">
+                {pedidosLoading || cadastrosQrLoading ? (
+                  <div className="flex items-center justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                ) : meusPedidos.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">Nenhum registro encontrado</p>
+                ) : (
+                  <div className="divide-y max-h-[520px] overflow-y-auto">
+                    {meusPedidos.map((p) => {
+                      const st = STATUS_LABELS[p.status] || STATUS_LABELS['realizado'];
+                      const cpfPedido = qrcodeRegistrationsService.normalizeDigits(p.cpf || '');
+                      const qrsRelacionados = meusCadastrosQr.filter(
+                        (registro) => qrcodeRegistrationsService.normalizeDigits(registro.document_number || '') === cpfPedido,
+                      );
+
+                      return (
+                        <div key={p.id} className="px-3 py-3 space-y-2.5 hover:bg-muted/30 transition-colors">
+                          <div
+                            className="flex items-center justify-between gap-2 cursor-pointer"
+                            onClick={() => handleViewPedido(p)}
+                          >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <span className="text-xs font-mono text-muted-foreground">#{p.id}</span>
                               <div className="min-w-0 flex-1">
@@ -721,32 +728,32 @@ const PdfRg = () => {
                                 {st.icon} {st.label}
                               </Badge>
                               {p.status === 'entregue' && p.pdf_entrega_nome && (
-                                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); handleDownloadPdf(p); }}>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 w-6 p-0"
+                                  onClick={(e) => { e.stopPropagation(); handleDownloadPdf(p); }}
+                                >
                                   <Download className="h-3.5 w-3.5 text-emerald-600" />
                                 </Button>
                               )}
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
 
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Meus Cadastros QR</p>
-                  {cadastrosQrLoading ? (
-                    <div className="flex items-center justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-                  ) : cadastrosQrRelacionados.length > 0 ? (
-                    <div className="space-y-2">
-                      {cadastrosQrRelacionados.map((registro) => (
-                        <QrCadastroCard key={registro.id} registration={registro} />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground text-center py-2">Nenhum cadastro QR encontrado</p>
-                  )}
-                </div>
+                          {qrsRelacionados.length > 0 ? (
+                            <div className="space-y-2">
+                              {qrsRelacionados.map((registro) => (
+                                <QrCadastroCard key={`${p.id}-${registro.id}`} registration={registro} />
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-muted-foreground">QR ainda não vinculado a este pedido.</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
