@@ -4760,7 +4760,7 @@ Todos os direitos reservados.`;
           )}
 
           {showEmailsSection && (
-            <div id="emails-section" className={emailsCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="emails-section">
               
               <EmailsSection
                 key={`emails-${sectionsRefreshKey}`}
