@@ -525,7 +525,7 @@ const PdfRg = () => {
       toast.error('PDF ainda não disponível');
       return;
     }
-    const downloadUrl = `https://api.apipainel.com.br/delivery.php?file=${encodeURIComponent(pedido.pdf_entrega_nome)}`;
+    const downloadUrl = getFullApiUrl(`/upload/delivery?file=${encodeURIComponent(pedido.pdf_entrega_nome)}`);
     window.open(downloadUrl, '_blank');
   };
 

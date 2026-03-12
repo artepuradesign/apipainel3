@@ -221,7 +221,11 @@ class PdfPersonalizado extends BaseModel {
         if ($row) {
             foreach (['anexo1_nome', 'anexo2_nome', 'anexo3_nome', 'pdf_entrega_nome'] as $field) {
                 if (!empty($row[$field])) {
-                    FileUpload::deleteFile($row[$field]);
+                    if ($field === 'pdf_entrega_nome') {
+                        FileUpload::deleteDeliveryFile($row[$field]);
+                    } else {
+                        FileUpload::deleteFile($row[$field]);
+                    }
                 }
             }
         }
