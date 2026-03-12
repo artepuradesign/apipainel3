@@ -112,6 +112,17 @@ export const AuxilioEmergencialSection = ({ auxilios, onEdit, onEditRecord, onAd
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
+              {onAddRecord ? (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onAddRecord}
+                  className="h-8 w-8 rounded-full"
+                  title="Adicionar novo registro"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              ) : null}
               <Badge variant="secondary" className="uppercase tracking-wide">
                 Online
               </Badge>
