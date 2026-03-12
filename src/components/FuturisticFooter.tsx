@@ -32,7 +32,7 @@ const FuturisticFooter = () => {
                 Plataforma completa para consulta de CPF e CNPJ com APIs integradas. Tecnologia de ponta e segurança máxima.
               </p>
               <div className="flex gap-2">
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                {[Facebook, Twitter, Instagram].map((Icon, i) => (
                   <a key={i} href="#" className="group/icon flex items-center justify-center w-8 h-8 rounded-lg border border-white/10 bg-white/5 hover:bg-fuchsia-500/20 hover:border-fuchsia-500/50 transition-all duration-300">
                     <Icon size={16} className="text-gray-400 group-hover/icon:text-fuchsia-400 transition-colors" />
                   </a>
