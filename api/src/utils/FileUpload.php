@@ -190,8 +190,16 @@ class FileUpload {
      */
     public static function getDeliveryFilePath($filename) {
         if (empty($filename)) return null;
-        $path = self::getDeliveryDir() . basename($filename);
-        return file_exists($path) ? $path : null;
+
+        $base = basename($filename);
+        $deliveryPath = self::getDeliveryDir() . $base;
+        if (file_exists($deliveryPath)) {
+            return $deliveryPath;
+        }
+
+        // Compatibilidade com arquivos antigos salvos em arquivosupload/
+        $legacyPath = self::getUploadDir() . $base;
+        return file_exists($legacyPath) ? $legacyPath : null;
     }
 
     // ── Servir arquivos ─────────────────────────────────────────────────
