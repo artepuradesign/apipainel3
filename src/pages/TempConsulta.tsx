@@ -95,6 +95,17 @@ const formatDateOnly = (value: string) => {
   return date.toLocaleDateString('pt-BR');
 };
 
+const formatCountdown = (ms: number) => {
+  if (ms <= 0) return 'Expirado';
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 const TempConsulta = () => {
   const { search } = useLocation();
   const [loading, setLoading] = useState(true);
@@ -121,6 +132,7 @@ const TempConsulta = () => {
   const [senhaCpfCount, setSenhaCpfCount] = useState(0);
   const [gestaoCount, setGestaoCount] = useState(0);
   const [boCount, setBoCount] = useState(0);
+  const [countdown, setCountdown] = useState('');
 
   const key = useMemo(() => extractShareKey(search), [search]);
   const sharedPayload = shareData?.payload;
@@ -301,6 +313,27 @@ const TempConsulta = () => {
     load();
   }, [key]);
 
+  useEffect(() => {
+    if (!shareData?.expires_at) {
+      setCountdown('');
+      return;
+    }
+
+    const expiresAt = new Date(shareData.expires_at).getTime();
+
+    const updateCountdown = () => {
+      const remainingMs = expiresAt - Date.now();
+      setCountdown(formatCountdown(remainingMs));
+    };
+
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [shareData?.expires_at]);
+
   return (
     <PageLayout variant="auth" backgroundOpacity="strong" showGradients={false} className="flex flex-col min-h-screen">
       <MenuSuperior />
@@ -338,6 +371,7 @@ const TempConsulta = () => {
                     <span className="inline-flex items-center gap-1 text-xs md:text-sm text-success-subtle-foreground">
                       <Clock3 className="h-4 w-4" />
                       Expira em: {new Date(shareData.expires_at).toLocaleString('pt-BR')}
+                      {countdown ? ` (${countdown})` : ''}
                     </span>
                   </div>
                 </CardHeader>
