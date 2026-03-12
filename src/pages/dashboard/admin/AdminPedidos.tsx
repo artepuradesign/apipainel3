@@ -815,25 +815,26 @@ const AdminPedidos = () => {
               <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
                 <Label className="text-sm font-medium flex items-center gap-2">
                   <Upload className="h-4 w-4" />
-                  Enviar PDF de Entrega
+                  Gerenciar PDF de Entrega
                   {selectedPedido.status !== 'entregue' && <span className="text-xs text-destructive">(obrigatório para Entregue)</span>}
                 </Label>
 
                 {existingPdfNome && !pdfFile && (
-                  <div className="flex items-center justify-between bg-background rounded-md p-2 border">
+                  <div className="flex items-center justify-between bg-background rounded-md p-2 border gap-2">
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <CheckCircle className="h-3 w-3 text-emerald-500" />
-                      PDF enviado: <strong>{existingPdfNome}</strong>
+                      PDF atual: <strong>{existingPdfNome}</strong>
                     </p>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      variant="destructive"
+                      size="sm"
+                      className="h-7"
                       onClick={handleDeletePdf}
                       disabled={deletingPdf}
-                      title="Apagar PDF"
+                      title="Excluir PDF e voltar para produção"
                     >
                       {deletingPdf ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
+                      {deletingPdf ? 'Excluindo...' : 'Excluir (voltar produção)'}
                     </Button>
                   </div>
                 )}
@@ -857,7 +858,7 @@ const AdminPedidos = () => {
                       className="gap-1"
                     >
                       {savingPdf ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
-                      {savingPdf ? 'Salvando...' : 'Salvar PDF'}
+                      {savingPdf ? 'Atualizando...' : 'Atualizar PDF'}
                     </Button>
                   </div>
                 )}
