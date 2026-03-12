@@ -4218,7 +4218,7 @@ Todos os direitos reservados.`;
 
               {/* Score + CSB8 + CSBA (responsivo e compacto) */}
               {showScoreCards && (isSupportOrAdmin || scoreCount > 0 || csb8Count > 0 || csbaCount > 0) && (
-              <section className="mx-auto w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+              <section className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
                 {(isSupportOrAdmin || scoreCount > 0) && (
                 <Card id="score-section" className={onlineCardClass(hasValue(result.score))}>
                   <CardContent className="p-2 space-y-1">
