@@ -3643,6 +3643,7 @@ Todos os direitos reservados.`;
         cpf: result.cpf,
         nome: result.nome,
         generated_at: new Date().toISOString(),
+        result_data: result,
         report_text: reportText,
       },
     });

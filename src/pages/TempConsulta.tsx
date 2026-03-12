@@ -6,6 +6,8 @@ import PageLayout from '@/components/layout/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Clock3, FileText } from 'lucide-react';
 import { tempConsultationShareService } from '@/services/tempConsultationShareService';
+import CpfResultDisplay from '@/components/dashboard/CpfResultDisplay';
+import ReceitaFederalDisplay from '@/components/dashboard/ReceitaFederalDisplay';
 
 const extractShareKey = (search: string) => {
   const params = new URLSearchParams(search);
@@ -27,6 +29,8 @@ const TempConsulta = () => {
   const [shareData, setShareData] = useState<any>(null);
 
   const key = useMemo(() => extractShareKey(search), [search]);
+  const sharedPayload = shareData?.payload;
+  const sharedResult = sharedPayload?.result_data || null;
 
   useEffect(() => {
     const load = async () => {
@@ -56,7 +60,7 @@ const TempConsulta = () => {
       <MenuSuperior />
 
       <main className="flex-1 w-full">
-        <section className="max-w-5xl mx-auto px-4 py-8 md:py-12 space-y-4">
+        <section className="max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
@@ -76,17 +80,26 @@ const TempConsulta = () => {
                 </div>
               )}
 
-              {!loading && !error && shareData?.payload && (
-                <div className="space-y-4">
+              {!loading && !error && sharedPayload && (
+                <div className="space-y-5">
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    <span><strong>CPF:</strong> {shareData.payload?.cpf || shareData.cpf || 'N/A'}</span>
-                    <span><strong>Nome:</strong> {shareData.payload?.nome || 'N/A'}</span>
+                    <span><strong>CPF:</strong> {sharedPayload?.cpf || shareData?.cpf || 'N/A'}</span>
+                    <span><strong>Nome:</strong> {sharedPayload?.nome || sharedResult?.nome || 'N/A'}</span>
                     <span className="inline-flex items-center gap-1"><Clock3 className="h-4 w-4" />Expira em: {new Date(shareData.expires_at).toLocaleString('pt-BR')}</span>
                   </div>
 
-                  <pre className="whitespace-pre-wrap break-words rounded-md border bg-card p-4 text-xs md:text-sm leading-relaxed">
-                    {shareData.payload?.report_text || 'Sem dados para exibir.'}
-                  </pre>
+                  {sharedResult ? (
+                    <>
+                      <CpfResultDisplay data={sharedResult} loading={false} showExportButton={false} />
+                      {sharedResult?.receita_federal && (
+                        <ReceitaFederalDisplay data={sharedResult.receita_federal} loading={false} />
+                      )}
+                    </>
+                  ) : (
+                    <pre className="whitespace-pre-wrap break-words rounded-md border bg-card p-4 text-xs md:text-sm leading-relaxed">
+                      {sharedPayload?.report_text || 'Sem dados para exibir.'}
+                    </pre>
+                  )}
                 </div>
               )}
             </CardContent>
