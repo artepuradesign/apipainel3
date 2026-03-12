@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Copy, FileText, FileDown, MessageCircle } from "lucide-react";
+import { Copy, FileText, FileDown, MessageCircle, Share2 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -21,9 +21,12 @@ type SectionActionButtonsProps = {
     copied?: string;
     exportedTxt?: string;
     exportedPdf?: string;
+    sharedTemporaryPage?: string;
   };
   /** Optional: custom WhatsApp text generator (e.g. dynamic temporary link) */
   getWhatsAppShareText?: () => Promise<string> | string;
+  /** Optional: custom temporary page share text generator */
+  getTemporaryPageShareText?: () => Promise<string> | string;
   /** When provided, the PDF button captures this DOM element visually */
   visualContainerRef?: React.RefObject<HTMLDivElement>;
 };
@@ -42,6 +45,10 @@ const downloadTxt = (text: string, filename: string) => {
   document.body.removeChild(element);
 };
 
+const extractFirstUrl = (text: string) => {
+  const match = text.match(/https?:\/\/[^\s]+/i);
+  return match?.[0] ?? null;
+};
 
 const exportVisualPdf = async (
   container: HTMLDivElement,
@@ -117,9 +124,11 @@ const SectionActionButtons: React.FC<SectionActionButtonsProps> = ({
   pdf,
   labels,
   getWhatsAppShareText,
+  getTemporaryPageShareText,
   visualContainerRef,
 }) => {
   const [isSharingWhatsApp, setIsSharingWhatsApp] = useState(false);
+  const [isSharingTemporaryPage, setIsSharingTemporaryPage] = useState(false);
 
   const onCopy = async () => {
     const text = getText();
@@ -165,6 +174,24 @@ const SectionActionButtons: React.FC<SectionActionButtonsProps> = ({
     }
   };
 
+  const onShareTemporaryPage = async () => {
+    if (!getTemporaryPageShareText) return;
+
+    try {
+      setIsSharingTemporaryPage(true);
+      const text = await getTemporaryPageShareText();
+      if (!text) return;
+
+      const shareUrl = extractFirstUrl(text);
+      await navigator.clipboard.writeText(shareUrl ?? text);
+      toast.success(labels?.sharedTemporaryPage ?? "Link da página temporária copiado!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao compartilhar página temporária");
+    } finally {
+      setIsSharingTemporaryPage(false);
+    }
+  };
+
   return (
     <div
       className="inline-flex items-center overflow-hidden rounded-md border bg-background shadow-sm"
@@ -207,8 +234,21 @@ const SectionActionButtons: React.FC<SectionActionButtonsProps> = ({
       >
         <MessageCircle className="h-4 w-4" />
       </Button>
+      {getTemporaryPageShareText && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onShareTemporaryPage}
+          disabled={isSharingTemporaryPage}
+          className="h-8 w-8 rounded-none border-l"
+          title="Compartilhar página temporária"
+        >
+          <Share2 className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };
 
 export default SectionActionButtons;
+
