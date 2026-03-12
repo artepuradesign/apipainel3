@@ -4754,6 +4754,7 @@ Todos os direitos reservados.`;
                 onCountChange={setTelefonesCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('telefones') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('telefones', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
