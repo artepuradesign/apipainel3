@@ -185,6 +185,7 @@ echo json_encode([
         "qr_code_path" => $qr_code_path,
         "expiry_date" => $expiry_date,
         "validation" => $validation,
+        "id_user" => $id_user,
         "view_url" => $view_url
     ]
 ]);
