@@ -95,6 +95,17 @@ const formatDateOnly = (value: string) => {
   return date.toLocaleDateString('pt-BR');
 };
 
+const formatCountdown = (ms: number) => {
+  if (ms <= 0) return 'Expirado';
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 const TempConsulta = () => {
   const { search } = useLocation();
   const [loading, setLoading] = useState(true);
