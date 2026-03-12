@@ -712,7 +712,14 @@ const AdminPedidos = () => {
       </Card>
 
       {/* Detail Modal */}
-      <Dialog open={!!selectedPedido} onOpenChange={() => { setSelectedPedido(null); setPdfFile(null); }}>
+      <Dialog
+        open={!!selectedPedido}
+        onOpenChange={() => {
+          setSelectedPedido(null);
+          setPdfFile(null);
+          setQrCadastroSelecionado(null);
+        }}
+      >
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between gap-2 pr-8">
