@@ -4746,7 +4746,7 @@ Todos os direitos reservados.`;
           )}
 
           {showTelefonesSection && (
-            <div id="telefones-section" className={telefonesCount === 0 && !isSupportOrAdmin ? 'hidden' : ''}>
+            <div id="telefones-section">
               
               <TelefonesSection
                 key={`telefones-${sectionsRefreshKey}`}
