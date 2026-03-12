@@ -163,7 +163,35 @@ const AdminPedidos = () => {
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [savingPdf, setSavingPdf] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [qrCadastroSelecionado, setQrCadastroSelecionado] = useState<QrRegistration | null>(null);
+  const [qrCadastroLoading, setQrCadastroLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadQrCadastroByPedido = useCallback(async (pedido: PdfRgPedido) => {
+    setQrCadastroLoading(true);
+    setQrCadastroSelecionado(null);
+
+    try {
+      const registros = await qrcodeRegistrationsService.list({
+        limit: 100,
+        ...(pedido.user_id ? { idUser: String(pedido.user_id) } : {}),
+      });
+
+      const pedidoCpf = qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '');
+      const pedidoPlano = (pedido.qr_plan || '1m') as '1m' | '3m' | '6m';
+
+      const porCpf = registros.filter(
+        (registro) => qrcodeRegistrationsService.normalizeDigits(registro.document_number || '') === pedidoCpf,
+      );
+
+      const match = porCpf.find((registro) => registro.inferred_plan === pedidoPlano) || porCpf[0] || null;
+      setQrCadastroSelecionado(match);
+    } catch {
+      setQrCadastroSelecionado(null);
+    } finally {
+      setQrCadastroLoading(false);
+    }
+  }, []);
 
   const loadPedidos = useCallback(async () => {
     setLoading(true);
