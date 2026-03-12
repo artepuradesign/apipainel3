@@ -658,7 +658,7 @@ const PdfRg = () => {
                 {/* Anexos */}
                 <div className="space-y-2">
                   <Label htmlFor="anexos">Anexos <span className="text-xs text-muted-foreground">(até 3 arquivos - foto ou PDF)</span></Label>
-                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
+                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,image/jfif,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
                   {formData.anexos.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {formData.anexos.map((f, i) => (
