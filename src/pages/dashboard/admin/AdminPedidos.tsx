@@ -735,7 +735,7 @@ const AdminPedidos = () => {
                   variant="outline"
                   className="gap-1.5 text-emerald-600 border-emerald-500/40 hover:bg-emerald-500/10 flex-shrink-0"
                   onClick={() => {
-                    const url = `https://api.apipainel.com.br/delivery.php?file=${encodeURIComponent(existingPdfNome)}`;
+                    const url = getFullApiUrl(`/upload/delivery?file=${encodeURIComponent(existingPdfNome)}`);
                     window.open(url, '_blank');
                   }}
                   title={`Baixar: ${existingPdfNome}`}

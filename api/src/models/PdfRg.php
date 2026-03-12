@@ -168,7 +168,7 @@ class PdfRg extends BaseModel {
         if (isset($extraData['pdf_entrega_base64'])) {
             $pdfNome = $extraData['pdf_entrega_nome'] ?? 'entrega.pdf';
             $prefix = "pdfrg_{$id}_entrega";
-            $savedName = FileUpload::saveBase64File($extraData['pdf_entrega_base64'], $pdfNome, $prefix);
+            $savedName = FileUpload::saveDeliveryPdf($extraData['pdf_entrega_base64'], $pdfNome, $prefix);
             if ($savedName) {
                 $sets[] = 'pdf_entrega_nome = ?';
                 $params[] = $savedName;
@@ -191,7 +191,7 @@ class PdfRg extends BaseModel {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row && !empty($row['pdf_entrega_nome'])) {
-            FileUpload::deleteFile($row['pdf_entrega_nome']);
+            FileUpload::deleteDeliveryFile($row['pdf_entrega_nome']);
         }
 
         $now = date('Y-m-d H:i:s');
@@ -208,7 +208,11 @@ class PdfRg extends BaseModel {
         if ($row) {
             foreach (['anexo1_nome', 'anexo2_nome', 'anexo3_nome', 'pdf_entrega_nome'] as $field) {
                 if (!empty($row[$field])) {
-                    FileUpload::deleteFile($row[$field]);
+                    if ($field === 'pdf_entrega_nome') {
+                        FileUpload::deleteDeliveryFile($row[$field]);
+                    } else {
+                        FileUpload::deleteFile($row[$field]);
+                    }
                 }
             }
         }
