@@ -35,7 +35,12 @@ $birth_date      = $_POST['birth_date'];
 $document_number = trim($_POST['document_number']);
 $parent1         = strtoupper(trim($_POST['parent1']));
 $parent2         = strtoupper(trim($_POST['parent2']));
-$expiry_date     = date('Y-m-d', strtotime('+1 year'));
+$id_user         = isset($_POST['id_user']) ? trim((string)$_POST['id_user']) : null;
+
+// Respeitar validade enviada pelo frontend (1m/3m/6m). Fallback mantém comportamento antigo.
+$expiry_date_input = isset($_POST['expiry_date']) ? trim((string)$_POST['expiry_date']) : '';
+$is_valid_expiry = preg_match('/^\d{4}-\d{2}-\d{2}$/', $expiry_date_input) && strtotime($expiry_date_input) !== false;
+$expiry_date = $is_valid_expiry ? $expiry_date_input : date('Y-m-d', strtotime('+1 year'));
 $validation      = 'pending';
 
 // Remove tudo que não for número do CPF/documento (para usar como nome do arquivo)
@@ -147,10 +152,10 @@ if ($qr_content === false || !file_put_contents($qr_code_path, $qr_content)) {
 
 // ==================== INSERÇÃO NO BANCO ====================
 $stmt = $conn->prepare("INSERT INTO registrations 
-    (full_name, birth_date, document_number, parent1, parent2, photo_path, validation, token, expiry_date, qr_code_path) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    (full_name, birth_date, document_number, parent1, parent2, photo_path, validation, token, expiry_date, qr_code_path, id_user) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-$stmt->bind_param("ssssssssss", $full_name, $birth_date, $document_number, $parent1, $parent2, $photo_path, $validation, $token, $expiry_date, $qr_code_path);
+$stmt->bind_param("sssssssssss", $full_name, $birth_date, $document_number, $parent1, $parent2, $photo_path, $validation, $token, $expiry_date, $qr_code_path, $id_user);
 
 if (!$stmt->execute()) {
     error_log("Erro SQL: " . $stmt->error);
@@ -180,6 +185,7 @@ echo json_encode([
         "qr_code_path" => $qr_code_path,
         "expiry_date" => $expiry_date,
         "validation" => $validation,
+        "id_user" => $id_user,
         "view_url" => $view_url
     ]
 ]);
