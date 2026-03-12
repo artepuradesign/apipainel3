@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, CheckCircle, Clock3, DollarSign, FileText, User } from 'lucide-react';
 import { tempConsultationShareService } from '@/services/tempConsultationShareService';
+import type { BaseAuxilioEmergencial } from '@/services/baseAuxilioEmergencialService';
+import type { BaseRais } from '@/services/baseRaisService';
 import FotosSection from '@/components/dashboard/FotosSection';
 import ScoreGaugeCard from '@/components/dashboard/ScoreGaugeCard';
 import TelefonesSection from '@/components/dashboard/TelefonesSection';
