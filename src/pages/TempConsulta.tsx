@@ -371,7 +371,9 @@ const TempConsulta = () => {
                     <span className="inline-flex items-center gap-1 text-xs md:text-sm text-success-subtle-foreground">
                       <Clock3 className="h-4 w-4" />
                       Expira em: {new Date(shareData.expires_at).toLocaleString('pt-BR')}
-                      {countdown ? ` (${countdown})` : ''}
+                      {countdown ? (
+                        <span className="inline-block min-w-[92px] text-right font-bold tabular-nums">({countdown})</span>
+                      ) : null}
                     </span>
                   </div>
                 </CardHeader>
