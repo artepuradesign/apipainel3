@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Mail, Clock, Shield, Award, Facebook, Twitter, Instagram, Linkedin, ArrowUpRight, Zap, Globe, Lock } from 'lucide-react';
+import { Package, Mail, Clock, Shield, Award, Facebook, Twitter, Instagram, ArrowUpRight, Zap, Globe, Lock } from 'lucide-react';
 import footerBg from '@/assets/footer-bg.png';
 
 const FuturisticFooter = () => {
