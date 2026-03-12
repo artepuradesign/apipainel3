@@ -4768,6 +4768,7 @@ Todos os direitos reservados.`;
                 onCountChange={setEmailsCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('emails') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('emails', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
