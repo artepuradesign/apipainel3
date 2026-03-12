@@ -252,8 +252,6 @@ const PdfRg = () => {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const allowedPhotoTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
-    if (!allowedPhotoTypes.includes(file.type)) { toast.error('Formato de foto inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Foto muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, foto: file }));
     readFileAsDataUrl(file, setPhotoPreviewUrl);
@@ -262,8 +260,6 @@ const PdfRg = () => {
   const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const allowedSignatureTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/jfif', 'image/pjpeg'];
-    if (!allowedSignatureTypes.includes(file.type)) { toast.error('Formato de assinatura inválido. Use JPG, JPEG, PNG ou JFIF'); return; }
     if (file.size > 10 * 1024 * 1024) { toast.error('Assinatura muito grande (máx 10MB)'); return; }
     setFormData(prev => ({ ...prev, assinatura: file }));
     readFileAsDataUrl(file, setSignaturePreviewUrl);
