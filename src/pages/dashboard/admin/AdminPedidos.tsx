@@ -757,6 +757,21 @@ const AdminPedidos = () => {
               {renderDetailContent()}
               {renderAnexos()}
 
+              {selectedPedido.type === 'pdf-rg' && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Cadastro QR vinculado:</p>
+                  {qrCadastroLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Carregando QR Code...
+                    </div>
+                  ) : qrCadastroSelecionado ? (
+                    <QrCadastroCard registration={qrCadastroSelecionado} />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Nenhum cadastro QR encontrado para este pedido.</p>
+                  )}
+                </div>
+              )}
+
               {/* PDF Upload for delivery */}
               <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
                 <Label className="text-sm font-medium flex items-center gap-2">
