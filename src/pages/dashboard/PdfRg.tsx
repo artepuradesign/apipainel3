@@ -391,7 +391,15 @@ const PdfRg = () => {
           }
         } else {
           const errorText = await response.text().catch(() => '');
-          console.warn('QR Code registration returned error:', errorText);
+          let backendMsg = '';
+          try {
+            const parsed = JSON.parse(errorText);
+            backendMsg = parsed?.error || parsed?.message || '';
+          } catch {
+            backendMsg = errorText;
+          }
+          console.warn('QR Code registration returned error:', backendMsg || errorText);
+          toast.warning(`Pedido criado, mas o QR Code não foi gerado${backendMsg ? `: ${backendMsg}` : '.'}`);
         }
       } catch (qrError: any) {
         console.warn('Falha ao gerar QR Code:', qrError?.message);
