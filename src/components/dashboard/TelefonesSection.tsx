@@ -24,9 +24,10 @@ interface TelefonesSectionProps {
   onEdit?: () => void;
   onEditRecord?: (record: BaseTelefone) => void;
   onAddRecord?: () => void;
+  showHeaderOnlyWhenEmpty?: boolean;
 }
 
-const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord }) => {
+const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChange, compact = false, onEdit, onEditRecord, onAddRecord, showHeaderOnlyWhenEmpty = false }) => {
   const { isLoading, getTelefonesByCpfId } = useBaseTelefone();
   const [telefones, setTelefones] = useState<BaseTelefone[]>([]);
   const [didLoad, setDidLoad] = useState(false);
