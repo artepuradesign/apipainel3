@@ -82,7 +82,7 @@ export const editarPdfService = {
     return apiRequest<EditarPdfPedido>(`/pdf-personalizado/${id}`);
   },
 
-  async atualizarStatus(id: number, status: EditarPdfStatus, extraData?: { pdf_entrega_base64?: string; pdf_entrega_nome?: string }) {
+  async atualizarStatus(id: number, status: EditarPdfStatus, extraData?: { pdf_entrega_base64?: string; pdf_entrega_nome?: string; remove_pdf?: boolean }) {
     return apiRequest<{ id: number; status: EditarPdfStatus }>('/pdf-personalizado/status', {
       method: 'POST',
       body: JSON.stringify({ id, status, ...extraData }),

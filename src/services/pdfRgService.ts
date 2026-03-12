@@ -97,7 +97,7 @@ export const pdfRgService = {
     return apiRequest<PdfRgPedido>(`/pdf-rg/${id}`);
   },
 
-  async atualizarStatus(id: number, status: PdfRgStatus, extraData?: { pdf_entrega_base64?: string; pdf_entrega_nome?: string }) {
+  async atualizarStatus(id: number, status: PdfRgStatus, extraData?: { pdf_entrega_base64?: string; pdf_entrega_nome?: string; remove_pdf?: boolean }) {
     return apiRequest<{ id: number; status: PdfRgStatus }>('/pdf-rg/status', {
       method: 'POST',
       body: JSON.stringify({ id, status, ...extraData }),
