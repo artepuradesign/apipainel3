@@ -17,6 +17,7 @@ if (!$authMiddleware->handle()) {
 $controller = new PdfRgController($db);
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = preg_replace('#^/api(?:\.php)?#', '', $path);
 
 switch ($method) {
     case 'GET':
@@ -33,13 +34,13 @@ switch ($method) {
         break;
 
     case 'POST':
-        if (strpos($path, '/pdf-rg/delete-pdf') !== false) {
+        if (preg_match('#/pdf-rg/delete-pdf/?$#', $path)) {
             // POST /pdf-rg/delete-pdf - deletar PDF de entrega
             $controller->deletarPdf();
-        } elseif (strpos($path, '/pdf-rg/status') !== false) {
+        } elseif (preg_match('#/pdf-rg/status/?$#', $path)) {
             // POST /pdf-rg/status - atualizar status (admin)
             $controller->atualizarStatus();
-        } elseif (strpos($path, '/pdf-rg') !== false && !preg_match('/\/pdf-rg\/\d+/', $path)) {
+        } elseif (preg_match('#/pdf-rg/?$#', $path)) {
             // POST /pdf-rg - criar pedido
             $raw = file_get_contents('php://input');
             $input = json_decode($raw, true) ?: [];

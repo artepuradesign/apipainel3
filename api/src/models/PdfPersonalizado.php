@@ -153,16 +153,31 @@ class PdfPersonalizado extends BaseModel {
         $sets[] = "$timestampCol = ?";
         $params[] = $now;
 
-        // Salvar PDF de entrega em disco (pasta upload/) se fornecido
-        if (isset($extraData['pdf_entrega_base64'])) {
+        $stmtCurrent = $this->db->prepare("SELECT pdf_entrega_nome FROM {$this->table} WHERE id = ?");
+        $stmtCurrent->execute([(int)$id]);
+        $current = $stmtCurrent->fetch(PDO::FETCH_ASSOC);
+        $currentPdf = $current['pdf_entrega_nome'] ?? null;
+
+        $shouldRemovePdf = !empty($extraData['remove_pdf']);
+
+        if ($shouldRemovePdf) {
+            if (!empty($currentPdf)) {
+                FileUpload::deleteDeliveryFile($currentPdf);
+            }
+            $sets[] = 'pdf_entrega_nome = NULL';
+            $sets[] = 'pdf_entrega_base64 = NULL';
+            $sets[] = 'entregue_at = NULL';
+        } elseif (isset($extraData['pdf_entrega_base64'])) {
+            if (!empty($currentPdf)) {
+                FileUpload::deleteDeliveryFile($currentPdf);
+            }
+
             $pdfNome = $extraData['pdf_entrega_nome'] ?? 'entrega.pdf';
             $prefix = "pdfpers_{$id}_entrega";
-            // PDFs de entrega do admin vão para upload/
             $savedName = FileUpload::saveDeliveryPdf($extraData['pdf_entrega_base64'], $pdfNome, $prefix);
             if ($savedName) {
                 $sets[] = 'pdf_entrega_nome = ?';
                 $params[] = $savedName;
-                // Não armazenar base64 no banco
                 $sets[] = 'pdf_entrega_base64 = NULL';
             }
         } elseif (isset($extraData['pdf_entrega_nome'])) {
@@ -186,9 +201,12 @@ class PdfPersonalizado extends BaseModel {
         }
 
         $now = date('Y-m-d H:i:s');
-        $query = "UPDATE {$this->table} SET pdf_entrega_base64 = NULL, pdf_entrega_nome = NULL, updated_at = ? WHERE id = ?";
+        $query = "UPDATE {$this->table}
+                  SET status = 'em_confeccao', em_confeccao_at = ?, entregue_at = NULL,
+                      pdf_entrega_base64 = NULL, pdf_entrega_nome = NULL, updated_at = ?
+                  WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$now, (int)$id]);
+        return $stmt->execute([$now, $now, (int)$id]);
     }
 
     public function solicitarCorrecao($id, $textoCorrecao, $novaDescricao = '') {

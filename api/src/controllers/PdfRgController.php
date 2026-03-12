@@ -89,6 +89,9 @@ class PdfRgController {
             if (isset($input['pdf_entrega_nome'])) {
                 $extraData['pdf_entrega_nome'] = $input['pdf_entrega_nome'];
             }
+            if (isset($input['remove_pdf'])) {
+                $extraData['remove_pdf'] = (bool)$input['remove_pdf'];
+            }
 
             $success = $this->model->atualizarStatus((int)$input['id'], $input['status'], $extraData);
             if ($success) {
