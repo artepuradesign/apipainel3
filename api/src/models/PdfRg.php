@@ -191,7 +191,7 @@ class PdfRg extends BaseModel {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row && !empty($row['pdf_entrega_nome'])) {
-            FileUpload::deleteFile($row['pdf_entrega_nome']);
+            FileUpload::deleteDeliveryFile($row['pdf_entrega_nome']);
         }
 
         $now = date('Y-m-d H:i:s');
