@@ -135,65 +135,67 @@ const TelefonesSection: React.FC<TelefonesSectionProps> = ({ cpfId, onCountChang
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 p-4 md:p-6">
-        {hasData ? (
-          <div className="space-y-4">
-            {telefones.map((telefone, index) => (
-              <div key={telefone.id} className="rounded-lg border border-border bg-muted/20 p-4 space-y-4">
-                <div className="flex items-center justify-between gap-2">
-                  <Badge variant="outline">Registro {index + 1}</Badge>
-                  {onEditRecord && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title={`Editar registro ${index + 1}`} onClick={() => onEditRecord(telefone)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  )}
+      {(hasData || !showHeaderOnlyWhenEmpty) ? (
+        <CardContent className="space-y-4 p-4 md:p-6">
+          {hasData ? (
+            <div className="space-y-4">
+              {telefones.map((telefone, index) => (
+                <div key={telefone.id} className="rounded-lg border border-border bg-muted/20 p-4 space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="outline">Registro {index + 1}</Badge>
+                    {onEditRecord && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title={`Editar registro ${index + 1}`} onClick={() => onEditRecord(telefone)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`ddd_${telefone.id}`}>DDD</Label>
+                      <Input id={`ddd_${telefone.id}`} value={telefone.ddd || '-'} disabled className="bg-muted text-[14px] md:text-sm" />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`tel_${telefone.id}`}>Telefone</Label>
+                      <Input id={`tel_${telefone.id}`} value={formatLocalPhone(telefone.telefone) || '-'} disabled className="bg-muted text-[14px] md:text-sm" />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`tipo_${telefone.id}`}>Tipo</Label>
+                      <Input id={`tipo_${telefone.id}`} value={telefone.tipo_texto || '-'} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
+                    </div>
+
+                    {!compact && (
+                      <>
+                        <div>
+                          <Label htmlFor={`class_${telefone.id}`}>Classificação</Label>
+                          <Input id={`class_${telefone.id}`} value={telefone.classificacao || '-'} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
+                        </div>
+
+                        <div>
+                          <Label htmlFor={`sigilo_${telefone.id}`}>Sigilo</Label>
+                          <Input id={`sigilo_${telefone.id}`} value={telefone.sigilo ? 'Sim' : 'Não'} disabled className="bg-muted text-[14px] md:text-sm" />
+                        </div>
+
+                        <div>
+                          <Label htmlFor={`dt_inc_${telefone.id}`}>Data Inclusão</Label>
+                          <Input id={`dt_inc_${telefone.id}`} value={telefone.data_inclusao ? formatDateOnly(telefone.data_inclusao) : '-'} disabled className="bg-muted text-[14px] md:text-sm" />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor={`ddd_${telefone.id}`}>DDD</Label>
-                    <Input id={`ddd_${telefone.id}`} value={telefone.ddd || '-'} disabled className="bg-muted text-[14px] md:text-sm" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor={`tel_${telefone.id}`}>Telefone</Label>
-                    <Input id={`tel_${telefone.id}`} value={formatLocalPhone(telefone.telefone) || '-'} disabled className="bg-muted text-[14px] md:text-sm" />
-                  </div>
-
-                  <div>
-                    <Label htmlFor={`tipo_${telefone.id}`}>Tipo</Label>
-                    <Input id={`tipo_${telefone.id}`} value={telefone.tipo_texto || '-'} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
-                  </div>
-
-                  {!compact && (
-                    <>
-                      <div>
-                        <Label htmlFor={`class_${telefone.id}`}>Classificação</Label>
-                        <Input id={`class_${telefone.id}`} value={telefone.classificacao || '-'} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`sigilo_${telefone.id}`}>Sigilo</Label>
-                        <Input id={`sigilo_${telefone.id}`} value={telefone.sigilo ? 'Sim' : 'Não'} disabled className="bg-muted text-[14px] md:text-sm" />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`dt_inc_${telefone.id}`}>Data Inclusão</Label>
-                        <Input id={`dt_inc_${telefone.id}`} value={telefone.data_inclusao ? formatDateOnly(telefone.data_inclusao) : '-'} disabled className="bg-muted text-[14px] md:text-sm" />
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : !showHeaderOnlyWhenEmpty ? (
-          <div className="text-center py-4 text-muted-foreground">
-            <Phone className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm">Nenhum telefone adicional encontrado para este CPF</p>
-          </div>
-        ) : null}
-      </CardContent>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-muted-foreground">
+              <Phone className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm">Nenhum telefone adicional encontrado para este CPF</p>
+            </div>
+          )}
+        </CardContent>
+      ) : null}
     </Card>
   );
 };
