@@ -690,7 +690,7 @@ const PdfRg = () => {
             </CardContent>
           </Card>
 
-          {/* Sidebar - Meus Pedidos (lista simples) */}
+          {/* Sidebar - Pedidos + Cadastros QR */}
           <div className="space-y-4">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="pb-2">
@@ -702,7 +702,7 @@ const PdfRg = () => {
                 ) : meusPedidos.length === 0 ? (
                   <p className="text-xs text-muted-foreground text-center py-4">Nenhum pedido encontrado</p>
                 ) : (
-                  <div className="divide-y max-h-[500px] overflow-y-auto">
+                  <div className="divide-y max-h-[420px] overflow-y-auto">
                     {meusPedidos.map((p) => {
                       const st = STATUS_LABELS[p.status] || STATUS_LABELS['realizado'];
                       return (
@@ -728,6 +728,25 @@ const PdfRg = () => {
                       );
                     })}
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Meus Cadastros QR</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {cadastrosQrLoading ? (
+                  <div className="flex items-center justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                ) : cadastrosQrRelacionados.length > 0 ? (
+                  <div className="space-y-2">
+                    {cadastrosQrRelacionados.map((registro) => (
+                      <QrCadastroCard key={registro.id} registration={registro} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-2">Nenhum cadastro QR encontrado</p>
                 )}
               </CardContent>
             </Card>
