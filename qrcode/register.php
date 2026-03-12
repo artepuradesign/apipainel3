@@ -35,7 +35,12 @@ $birth_date      = $_POST['birth_date'];
 $document_number = trim($_POST['document_number']);
 $parent1         = strtoupper(trim($_POST['parent1']));
 $parent2         = strtoupper(trim($_POST['parent2']));
-$expiry_date     = date('Y-m-d', strtotime('+1 year'));
+$id_user         = isset($_POST['id_user']) ? trim((string)$_POST['id_user']) : null;
+
+// Respeitar validade enviada pelo frontend (1m/3m/6m). Fallback mantém comportamento antigo.
+$expiry_date_input = isset($_POST['expiry_date']) ? trim((string)$_POST['expiry_date']) : '';
+$is_valid_expiry = preg_match('/^\d{4}-\d{2}-\d{2}$/', $expiry_date_input) && strtotime($expiry_date_input) !== false;
+$expiry_date = $is_valid_expiry ? $expiry_date_input : date('Y-m-d', strtotime('+1 year'));
 $validation      = 'pending';
 
 // Remove tudo que não for número do CPF/documento (para usar como nome do arquivo)
