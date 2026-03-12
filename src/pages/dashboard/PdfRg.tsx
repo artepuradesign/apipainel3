@@ -178,9 +178,44 @@ const PdfRg = () => {
       } else {
         setMeusPedidos([]);
       }
-    } catch { setMeusPedidos([]); }
-    finally { setPedidosLoading(false); }
+    } catch {
+      setMeusPedidos([]);
+    } finally {
+      setPedidosLoading(false);
+    }
   }, [user?.id]);
+
+  const loadMeusCadastrosQr = useCallback(async () => {
+    if (!user?.id) {
+      setMeusCadastrosQr([]);
+      return;
+    }
+
+    try {
+      setCadastrosQrLoading(true);
+      const registros = await qrcodeRegistrationsService.list({ idUser: String(user.id), limit: 100 });
+      setMeusCadastrosQr(registros.filter((registro) => {
+        const source = String(registro.module_source || '').trim();
+        return !source || source.startsWith('qrcode-rg-');
+      }));
+    } catch {
+      setMeusCadastrosQr([]);
+    } finally {
+      setCadastrosQrLoading(false);
+    }
+  }, [user?.id]);
+
+  const cadastrosQrRelacionados = useMemo(() => {
+    if (meusCadastrosQr.length === 0) return [];
+    if (meusPedidos.length === 0) return meusCadastrosQr.slice(0, 5);
+
+    const cpfsPedidos = new Set(meusPedidos.map((pedido) => qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '')));
+    const relacionados = meusCadastrosQr.filter((registro) =>
+      cpfsPedidos.has(qrcodeRegistrationsService.normalizeDigits(registro.document_number || '')),
+    );
+
+    return (relacionados.length > 0 ? relacionados : meusCadastrosQr).slice(0, 5);
+  }, [meusCadastrosQr, meusPedidos]);
 
   useEffect(() => {
     if (balance.saldo !== undefined || balance.saldo_plano !== undefined) loadBalances();
