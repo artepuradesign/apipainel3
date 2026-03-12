@@ -279,8 +279,10 @@ const AdminPedidos = () => {
             pdf_entrega_nome: res.data.pdf_entrega_nome || null,
             raw_rg: res.data,
           });
+          await loadQrCadastroByPedido(res.data);
         } else {
           toast.error('Erro ao carregar detalhes');
+          setQrCadastroSelecionado(null);
         }
       } else {
         const res = await editarPdfService.obter(pedido.id);
@@ -293,6 +295,7 @@ const AdminPedidos = () => {
         } else {
           toast.error('Erro ao carregar detalhes');
         }
+        setQrCadastroSelecionado(null);
       }
     } catch (e) {
       toast.error('Erro ao carregar detalhes');
