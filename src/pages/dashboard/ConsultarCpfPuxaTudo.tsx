@@ -4782,6 +4782,7 @@ Todos os direitos reservados.`;
                 onCountChange={setEnderecosCount}
                 onAddRecord={isSupportOrAdmin ? () => openAddSectionModal('enderecos') : undefined}
                 onEditRecord={isSupportOrAdmin ? (record) => openEditModal('enderecos', record) : undefined}
+                showHeaderOnlyWhenEmpty
               />
             </div>
           )}
