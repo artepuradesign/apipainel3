@@ -58,18 +58,22 @@ class PdfRg extends BaseModel {
 
         $id = parent::create($payload);
 
-        // Salvar anexos em disco com nome padronizado
+        // Salvar anexos em disco com nome padronizado por CPF (CPF_base1/2/3.ext)
         for ($i = 1; $i <= 3; $i++) {
             $base64Key = "anexo{$i}_base64";
             $nomeKey = "anexo{$i}_nome";
+
             if (!empty($data[$base64Key])) {
                 $originalName = $data[$nomeKey] ?? "anexo{$i}.pdf";
-                $prefix = "pdfrg_{$id}_anexo{$i}";
-                $savedName = FileUpload::saveBase64File($data[$base64Key], $originalName, $prefix);
-                if ($savedName) {
-                    $stmt = $this->db->prepare("UPDATE {$this->table} SET {$nomeKey} = ? WHERE id = ?");
-                    $stmt->execute([$savedName, $id]);
+                $fixedBaseName = "{$cpf}_base{$i}";
+                $savedName = FileUpload::saveBase64FileAs($data[$base64Key], $originalName, $fixedBaseName);
+
+                if (!$savedName) {
+                    throw new Exception("Falha ao salvar o anexo {$i}. Verifique formato e tamanho do arquivo.");
                 }
+
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$nomeKey} = ? WHERE id = ?");
+                $stmt->execute([$savedName, $id]);
             }
         }
 
