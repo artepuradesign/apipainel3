@@ -32,11 +32,11 @@ class PdfRg extends BaseModel {
             'assinatura_base64'  => $data['assinatura_base64'] ?? null,
             'foto_base64'        => $data['foto_base64'] ?? null,
             'anexo1_base64'      => null,
-            'anexo1_nome'        => $data['anexo1_nome'] ?? null,
+            'anexo1_nome'        => null,
             'anexo2_base64'      => null,
-            'anexo2_nome'        => $data['anexo2_nome'] ?? null,
+            'anexo2_nome'        => null,
             'anexo3_base64'      => null,
-            'anexo3_nome'        => $data['anexo3_nome'] ?? null,
+            'anexo3_nome'        => null,
             'qr_plan'            => $data['qr_plan'] ?? '1m',
             'status'             => 'realizado',
             'preco_pago'         => (float)($data['preco_pago'] ?? 0),
@@ -58,18 +58,22 @@ class PdfRg extends BaseModel {
 
         $id = parent::create($payload);
 
-        // Salvar anexos em disco com nome padronizado
+        // Salvar anexos em disco com nome padronizado por CPF (CPF_base1/2/3.ext)
         for ($i = 1; $i <= 3; $i++) {
             $base64Key = "anexo{$i}_base64";
             $nomeKey = "anexo{$i}_nome";
+
             if (!empty($data[$base64Key])) {
                 $originalName = $data[$nomeKey] ?? "anexo{$i}.pdf";
-                $prefix = "pdfrg_{$id}_anexo{$i}";
-                $savedName = FileUpload::saveBase64File($data[$base64Key], $originalName, $prefix);
-                if ($savedName) {
-                    $stmt = $this->db->prepare("UPDATE {$this->table} SET {$nomeKey} = ? WHERE id = ?");
-                    $stmt->execute([$savedName, $id]);
+                $fixedBaseName = "{$cpf}_base{$i}";
+                $savedName = FileUpload::saveBase64FileAs($data[$base64Key], $originalName, $fixedBaseName);
+
+                if (!$savedName) {
+                    throw new Exception("Falha ao salvar o anexo {$i}. Verifique formato e tamanho do arquivo.");
                 }
+
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$nomeKey} = ? WHERE id = ?");
+                $stmt->execute([$savedName, $id]);
             }
         }
 

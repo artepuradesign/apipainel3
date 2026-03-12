@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import { pdfRgService, PdfRgPedido, PdfRgStatus } from '@/services/pdfRgService';
 import { editarPdfService, EditarPdfPedido } from '@/services/pdfPersonalizadoService';
+import { qrcodeRegistrationsService, type QrRegistration } from '@/services/qrcodeRegistrationsService';
 import { Search, Eye, Trash2, RefreshCw, Download, Loader2, Upload, Package, DollarSign, Hammer, CheckCircle, X, FileEdit } from 'lucide-react';
 import DashboardTitleCard from '@/components/dashboard/DashboardTitleCard';
+import QrCadastroCard from '@/components/qrcode/QrCadastroCard';
 import { getFullApiUrl } from '@/utils/apiHelper';
 import { cookieUtils } from '@/utils/cookieUtils';
 
@@ -161,7 +163,35 @@ const AdminPedidos = () => {
   const [deletingPdf, setDeletingPdf] = useState(false);
   const [savingPdf, setSavingPdf] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [qrCadastroSelecionado, setQrCadastroSelecionado] = useState<QrRegistration | null>(null);
+  const [qrCadastroLoading, setQrCadastroLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadQrCadastroByPedido = useCallback(async (pedido: PdfRgPedido) => {
+    setQrCadastroLoading(true);
+    setQrCadastroSelecionado(null);
+
+    try {
+      const registros = await qrcodeRegistrationsService.list({
+        limit: 100,
+        ...(pedido.user_id ? { idUser: String(pedido.user_id) } : {}),
+      });
+
+      const pedidoCpf = qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '');
+      const pedidoPlano = (pedido.qr_plan || '1m') as '1m' | '3m' | '6m';
+
+      const porCpf = registros.filter(
+        (registro) => qrcodeRegistrationsService.normalizeDigits(registro.document_number || '') === pedidoCpf,
+      );
+
+      const match = porCpf.find((registro) => registro.inferred_plan === pedidoPlano) || porCpf[0] || null;
+      setQrCadastroSelecionado(match);
+    } catch {
+      setQrCadastroSelecionado(null);
+    } finally {
+      setQrCadastroLoading(false);
+    }
+  }, []);
 
   const loadPedidos = useCallback(async () => {
     setLoading(true);
@@ -249,8 +279,10 @@ const AdminPedidos = () => {
             pdf_entrega_nome: res.data.pdf_entrega_nome || null,
             raw_rg: res.data,
           });
+          await loadQrCadastroByPedido(res.data);
         } else {
           toast.error('Erro ao carregar detalhes');
+          setQrCadastroSelecionado(null);
         }
       } else {
         const res = await editarPdfService.obter(pedido.id);
@@ -263,6 +295,7 @@ const AdminPedidos = () => {
         } else {
           toast.error('Erro ao carregar detalhes');
         }
+        setQrCadastroSelecionado(null);
       }
     } catch (e) {
       toast.error('Erro ao carregar detalhes');
@@ -679,7 +712,14 @@ const AdminPedidos = () => {
       </Card>
 
       {/* Detail Modal */}
-      <Dialog open={!!selectedPedido} onOpenChange={() => { setSelectedPedido(null); setPdfFile(null); }}>
+      <Dialog
+        open={!!selectedPedido}
+        onOpenChange={() => {
+          setSelectedPedido(null);
+          setPdfFile(null);
+          setQrCadastroSelecionado(null);
+        }}
+      >
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between gap-2 pr-8">
@@ -716,6 +756,21 @@ const AdminPedidos = () => {
 
               {renderDetailContent()}
               {renderAnexos()}
+
+              {selectedPedido.type === 'pdf-rg' && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Cadastro QR vinculado:</p>
+                  {qrCadastroLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Carregando QR Code...
+                    </div>
+                  ) : qrCadastroSelecionado ? (
+                    <QrCadastroCard registration={qrCadastroSelecionado} />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Nenhum cadastro QR encontrado para este pedido.</p>
+                  )}
+                </div>
+              )}
 
               {/* PDF Upload for delivery */}
               <div className="border rounded-lg p-4 space-y-3 bg-muted/30">

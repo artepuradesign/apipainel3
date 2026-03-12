@@ -19,6 +19,8 @@ import { getModulePrice } from '@/utils/modulePrice';
 import { consultationApiService } from '@/services/consultationApiService';
 import { walletApiService } from '@/services/walletApiService';
 import { pdfRgService, type PdfRgPedido } from '@/services/pdfRgService';
+import { qrcodeRegistrationsService, type QrRegistration } from '@/services/qrcodeRegistrationsService';
+import QrCadastroCard from '@/components/qrcode/QrCadastroCard';
 import SimpleTitleBar from '@/components/dashboard/SimpleTitleBar';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ScrollToTop from '@/components/ui/scroll-to-top';
@@ -82,6 +84,8 @@ const PdfRg = () => {
   const [pedidosLoading, setPedidosLoading] = useState(false);
   const [pedidoDetalhe, setPedidoDetalhe] = useState<PdfRgPedido | null>(null);
   const [showDetalheModal, setShowDetalheModal] = useState(false);
+  const [meusCadastrosQr, setMeusCadastrosQr] = useState<QrRegistration[]>([]);
+  const [cadastrosQrLoading, setCadastrosQrLoading] = useState(false);
 
   const { balance, loadBalance: reloadApiBalance } = useWalletBalance();
   const {
@@ -174,9 +178,44 @@ const PdfRg = () => {
       } else {
         setMeusPedidos([]);
       }
-    } catch { setMeusPedidos([]); }
-    finally { setPedidosLoading(false); }
+    } catch {
+      setMeusPedidos([]);
+    } finally {
+      setPedidosLoading(false);
+    }
   }, [user?.id]);
+
+  const loadMeusCadastrosQr = useCallback(async () => {
+    if (!user?.id) {
+      setMeusCadastrosQr([]);
+      return;
+    }
+
+    try {
+      setCadastrosQrLoading(true);
+      const registros = await qrcodeRegistrationsService.list({ idUser: String(user.id), limit: 100 });
+      setMeusCadastrosQr(registros.filter((registro) => {
+        const source = String(registro.module_source || '').trim();
+        return !source || source.startsWith('qrcode-rg-');
+      }));
+    } catch {
+      setMeusCadastrosQr([]);
+    } finally {
+      setCadastrosQrLoading(false);
+    }
+  }, [user?.id]);
+
+  const cadastrosQrRelacionados = useMemo(() => {
+    if (meusCadastrosQr.length === 0) return [];
+    if (meusPedidos.length === 0) return meusCadastrosQr.slice(0, 5);
+
+    const cpfsPedidos = new Set(meusPedidos.map((pedido) => qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '')));
+    const relacionados = meusCadastrosQr.filter((registro) =>
+      cpfsPedidos.has(qrcodeRegistrationsService.normalizeDigits(registro.document_number || '')),
+    );
+
+    return (relacionados.length > 0 ? relacionados : meusCadastrosQr).slice(0, 5);
+  }, [meusCadastrosQr, meusPedidos]);
 
   useEffect(() => {
     if (balance.saldo !== undefined || balance.saldo_plano !== undefined) loadBalances();
@@ -186,7 +225,8 @@ const PdfRg = () => {
     if (!user) return;
     reloadApiBalance();
     loadMeusPedidos();
-  }, [user, reloadApiBalance, loadMeusPedidos]);
+    loadMeusCadastrosQr();
+  }, [user, reloadApiBalance, loadMeusPedidos, loadMeusCadastrosQr]);
 
   useEffect(() => { if (user) loadModulePrice(); }, [user, loadModulePrice]);
 
@@ -230,8 +270,8 @@ const PdfRg = () => {
     if (files.length > 3) { toast.error('Máximo 3 anexos permitidos'); return; }
     for (const f of files) {
       if (f.size > 15 * 1024 * 1024) { toast.error(`Arquivo ${f.name} muito grande (máx 15MB)`); return; }
-      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
-      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF ou PDF`); return; }
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/jfif', 'application/pdf'];
+      if (!allowed.includes(f.type)) { toast.error(`Formato inválido: ${f.name}. Use JPG, PNG, GIF, JFIF ou PDF`); return; }
     }
     setFormData(prev => ({ ...prev, anexos: files.slice(0, 3) }));
   };
@@ -618,7 +658,7 @@ const PdfRg = () => {
                 {/* Anexos */}
                 <div className="space-y-2">
                   <Label htmlFor="anexos">Anexos <span className="text-xs text-muted-foreground">(até 3 arquivos - foto ou PDF)</span></Label>
-                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
+                  <Input id="anexos" type="file" accept="image/jpeg,image/jpg,image/png,image/gif,image/jfif,application/pdf" multiple onChange={handleAnexosChange} className="cursor-pointer" />
                   {formData.anexos.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {formData.anexos.map((f, i) => (
@@ -650,7 +690,7 @@ const PdfRg = () => {
             </CardContent>
           </Card>
 
-          {/* Sidebar - Meus Pedidos (lista simples) */}
+          {/* Sidebar - Pedidos + Cadastros QR */}
           <div className="space-y-4">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="pb-2">
@@ -662,7 +702,7 @@ const PdfRg = () => {
                 ) : meusPedidos.length === 0 ? (
                   <p className="text-xs text-muted-foreground text-center py-4">Nenhum pedido encontrado</p>
                 ) : (
-                  <div className="divide-y max-h-[500px] overflow-y-auto">
+                  <div className="divide-y max-h-[420px] overflow-y-auto">
                     {meusPedidos.map((p) => {
                       const st = STATUS_LABELS[p.status] || STATUS_LABELS['realizado'];
                       return (
@@ -688,6 +728,25 @@ const PdfRg = () => {
                       );
                     })}
                   </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Meus Cadastros QR</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {cadastrosQrLoading ? (
+                  <div className="flex items-center justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                ) : cadastrosQrRelacionados.length > 0 ? (
+                  <div className="space-y-2">
+                    {cadastrosQrRelacionados.map((registro) => (
+                      <QrCadastroCard key={registro.id} registration={registro} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-2">Nenhum cadastro QR encontrado</p>
                 )}
               </CardContent>
             </Card>
