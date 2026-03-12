@@ -172,19 +172,28 @@ const AdminPedidos = () => {
     setQrCadastroSelecionado(null);
 
     try {
-      const registros = await qrcodeRegistrationsService.list({
+      const pedidoCpf = qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '');
+      const pedidoPlano = (pedido.qr_plan || '1m') as '1m' | '3m' | '6m';
+
+      const selecionarMatch = (registros: QrRegistration[]) => {
+        const porCpf = registros.filter(
+          (registro) => qrcodeRegistrationsService.normalizeDigits(registro.document_number || '') === pedidoCpf,
+        );
+        return porCpf.find((registro) => registro.inferred_plan === pedidoPlano) || porCpf[0] || null;
+      };
+
+      const registrosPorUsuario = await qrcodeRegistrationsService.list({
         limit: 100,
         ...(pedido.user_id ? { idUser: String(pedido.user_id) } : {}),
       });
 
-      const pedidoCpf = qrcodeRegistrationsService.normalizeDigits(pedido.cpf || '');
-      const pedidoPlano = (pedido.qr_plan || '1m') as '1m' | '3m' | '6m';
+      let match = selecionarMatch(registrosPorUsuario);
 
-      const porCpf = registros.filter(
-        (registro) => qrcodeRegistrationsService.normalizeDigits(registro.document_number || '') === pedidoCpf,
-      );
+      if (!match && pedido.user_id) {
+        const registrosGlobais = await qrcodeRegistrationsService.list({ limit: 100 });
+        match = selecionarMatch(registrosGlobais);
+      }
 
-      const match = porCpf.find((registro) => registro.inferred_plan === pedidoPlano) || porCpf[0] || null;
       setQrCadastroSelecionado(match);
     } catch {
       setQrCadastroSelecionado(null);
