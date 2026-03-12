@@ -17,6 +17,7 @@ if (!$authMiddleware->handle()) {
 $controller = new PdfRgController($db);
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = preg_replace('#^/api(?:\.php)?#', '', $path);
 
 switch ($method) {
     case 'GET':

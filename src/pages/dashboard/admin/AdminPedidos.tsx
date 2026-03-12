@@ -436,28 +436,58 @@ const AdminPedidos = () => {
 
   const handleDeletePdf = async () => {
     if (!selectedPedido) return;
-    if (!confirm('Tem certeza que deseja apagar o PDF enviado?')) return;
+    if (!confirm('Tem certeza que deseja excluir o PDF? O pedido voltará para Em Confecção (produção).')) return;
+
     setDeletingPdf(true);
     try {
-      let res;
-      if (selectedPedido.type === 'pdf-rg') {
-        res = await pdfRgService.deletarPdf(selectedPedido.id);
-      } else {
-        res = await editarPdfService.deletarPdf(selectedPedido.id);
-      }
+      const targetStatus: PdfRgStatus = 'em_confeccao';
+      const extraData = { remove_pdf: true };
+
+      const res = selectedPedido.type === 'pdf-rg'
+        ? await pdfRgService.atualizarStatus(selectedPedido.id, targetStatus, extraData)
+        : await editarPdfService.atualizarStatus(selectedPedido.id, targetStatus, extraData);
+
       if (res.success) {
-        toast.success('PDF apagado com sucesso');
+        toast.success('PDF excluído e pedido retornado para Em Confecção.');
+
         if (selectedPedido.type === 'pdf-rg') {
-          setSelectedPedido(prev => prev && prev.raw_rg ? { ...prev, raw_rg: { ...prev.raw_rg, pdf_entrega_base64: null, pdf_entrega_nome: null } } : prev);
+          const detail = await pdfRgService.obter(selectedPedido.id);
+          if (detail.success && detail.data) {
+            setSelectedPedido(prev => prev ? {
+              ...prev,
+              status: detail.data.status,
+              pdf_entrega_nome: detail.data.pdf_entrega_nome || null,
+              realizado_at: detail.data.realizado_at,
+              pagamento_confirmado_at: detail.data.pagamento_confirmado_at,
+              em_confeccao_at: detail.data.em_confeccao_at,
+              entregue_at: detail.data.entregue_at,
+              raw_rg: detail.data,
+            } : null);
+          }
         } else {
-          setSelectedPedido(prev => prev && prev.raw_personalizado ? { ...prev, raw_personalizado: { ...prev.raw_personalizado, pdf_entrega_base64: null, pdf_entrega_nome: null } } : prev);
+          const detail = await editarPdfService.obter(selectedPedido.id);
+          if (detail.success && detail.data) {
+            setSelectedPedido(prev => prev ? {
+              ...prev,
+              status: detail.data.status,
+              pdf_entrega_nome: detail.data.pdf_entrega_nome || null,
+              realizado_at: detail.data.realizado_at,
+              pagamento_confirmado_at: detail.data.pagamento_confirmado_at,
+              em_confeccao_at: detail.data.em_confeccao_at,
+              entregue_at: detail.data.entregue_at,
+              raw_personalizado: detail.data,
+            } : null);
+          }
         }
+
+        setPdfFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         loadPedidos();
       } else {
-        toast.error(res.error || 'Erro ao apagar PDF');
+        toast.error(res.error || 'Erro ao excluir PDF');
       }
     } catch {
-      toast.error('Erro ao apagar PDF');
+      toast.error('Erro ao excluir PDF');
     } finally {
       setDeletingPdf(false);
     }
