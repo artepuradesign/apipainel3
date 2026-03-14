@@ -3636,6 +3636,12 @@ Todos os direitos reservados.`;
       throw new Error('Não foi possível gerar os dados para compartilhamento.');
     }
 
+    const sharedResultData = {
+      ...result,
+      auxilio_emergencial: auxiliosEmergenciais,
+      rais_historico: rais,
+    };
+
     const share = await tempConsultationShareService.createTemporaryShare({
       cpf: result.cpf,
       payload: {
@@ -3643,7 +3649,38 @@ Todos os direitos reservados.`;
         cpf: result.cpf,
         nome: result.nome,
         generated_at: new Date().toISOString(),
-        result_data: result,
+        result_data: sharedResultData,
+        badge_counts: {
+          '#fotos-section': fotosCount,
+          '#score-section': scoreCount,
+          '#csb8-section': csb8Count,
+          '#csba-section': csbaCount,
+          '#dados-financeiros-section': dadosFinanceirosCount,
+          '#dados-basicos-section': dadosBasicosCount,
+          '#telefones-section': telefonesCount,
+          '#emails-section': emailsCount,
+          '#enderecos-section': enderecosCount,
+          '#titulo-eleitor-section': tituloEleitorCount,
+          '#parentes-section': parentesCount,
+          '#certidao-nascimento-section': certidaoNascimentoCount,
+          '#documento-section': documentoCount,
+          '#cns-section': cnsCount,
+          '#pis-section': pisCount,
+          '#vacinas-section': vacinasCount,
+          '#empresas-socio-section': empresasSocioCount,
+          '#cnpj-mei-section': cnpjMeiCount,
+          '#dividas-ativas-section': dividasAtivasCount,
+          '#auxilio-emergencial-section': auxiliosEmergenciais?.length ?? 0,
+          '#rais-section': rais?.length ?? 0,
+          '#inss-section': inssCount,
+          '#claro-section': claroCount,
+          '#vivo-section': vivoCount,
+          '#tim-section': timCount,
+          '#oi-section': oiCount,
+          '#senhas-email-section': senhaEmailCount,
+          '#senhas-cpf-section': senhaCpfCount,
+          '#gestao-cadastral-section': gestaoCount,
+        },
         report_text: reportText,
       },
     });
