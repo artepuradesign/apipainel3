@@ -3642,6 +3642,30 @@ Todos os direitos reservados.`;
       rais_historico: rais,
     };
 
+    const scoreBadgeCount = hasValue(result.score) ? 1 : 0;
+    const csb8BadgeCount = hasValue(result.csb8) || hasValue(result.csb8_faixa) ? 1 : 0;
+    const csbaBadgeCount = hasValue(result.csba) || hasValue(result.csba_faixa) ? 1 : 0;
+    const dadosFinanceirosBadgeCount = [result.renda, result.fx_poder_aquisitivo, result.poder_aquisitivo].some(hasValue) ? 1 : 0;
+    const dadosBasicosBadgeCount = [
+      result.cpf,
+      result.nome,
+      result.data_nascimento,
+      result.sexo,
+      result.mae || result.nome_mae,
+      result.pai || result.nome_pai,
+      result.estado_civil,
+      result.rg,
+      result.cbo,
+      result.orgao_emissor,
+      result.uf_emissao,
+      result.data_obito,
+      result.titulo_eleitor,
+    ].some(hasValue)
+      ? 1
+      : 0;
+    const tituloEleitorBadgeCount = [result.titulo_eleitor, result.zona, result.secao].some(hasValue) ? 1 : 0;
+    const pisBadgeCount = hasValue(result.pis) ? 1 : 0;
+
     const share = await tempConsultationShareService.createTemporaryShare({
       cpf: result.cpf,
       payload: {
@@ -3652,20 +3676,20 @@ Todos os direitos reservados.`;
         result_data: sharedResultData,
         badge_counts: {
           '#fotos-section': fotosCount,
-          '#score-section': scoreCount,
-          '#csb8-section': csb8Count,
-          '#csba-section': csbaCount,
-          '#dados-financeiros-section': dadosFinanceirosCount,
-          '#dados-basicos-section': dadosBasicosCount,
+          '#score-section': scoreBadgeCount,
+          '#csb8-section': csb8BadgeCount,
+          '#csba-section': csbaBadgeCount,
+          '#dados-financeiros-section': dadosFinanceirosBadgeCount,
+          '#dados-basicos-section': dadosBasicosBadgeCount,
           '#telefones-section': telefonesCount,
           '#emails-section': emailsCount,
           '#enderecos-section': enderecosCount,
-          '#titulo-eleitor-section': tituloEleitorCount,
+          '#titulo-eleitor-section': tituloEleitorBadgeCount,
           '#parentes-section': parentesCount,
           '#certidao-nascimento-section': certidaoNascimentoCount,
           '#documento-section': documentoCount,
           '#cns-section': cnsCount,
-          '#pis-section': pisCount,
+          '#pis-section': pisBadgeCount,
           '#vacinas-section': vacinasCount,
           '#empresas-socio-section': empresasSocioCount,
           '#cnpj-mei-section': cnpjMeiCount,
