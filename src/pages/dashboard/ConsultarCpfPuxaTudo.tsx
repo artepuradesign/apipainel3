@@ -3642,10 +3642,20 @@ Todos os direitos reservados.`;
       rais_historico: rais,
     };
 
-    const scoreBadgeCount = hasValue(result.score) ? 1 : 0;
-    const csb8BadgeCount = hasValue(result.csb8) || hasValue(result.csb8_faixa) ? 1 : 0;
-    const csbaBadgeCount = hasValue(result.csba) || hasValue(result.csba_faixa) ? 1 : 0;
-    const dadosFinanceirosBadgeCount = [result.renda, result.fx_poder_aquisitivo, result.poder_aquisitivo].some(hasValue) ? 1 : 0;
+    const hasBadgeValue = (value: unknown) => {
+      if (value === null || value === undefined) return false;
+      if (typeof value === 'string') {
+        const normalized = value.trim().toUpperCase();
+        return normalized !== '' && normalized !== '-' && normalized !== 'SEM RESULTADO' && normalized !== 'SEM DADOS';
+      }
+      if (Array.isArray(value)) return value.length > 0;
+      return true;
+    };
+
+    const scoreBadgeCount = hasBadgeValue(result.score) ? 1 : 0;
+    const csb8BadgeCount = hasBadgeValue(result.csb8) || hasBadgeValue(result.csb8_faixa) ? 1 : 0;
+    const csbaBadgeCount = hasBadgeValue(result.csba) || hasBadgeValue(result.csba_faixa) ? 1 : 0;
+    const dadosFinanceirosBadgeCount = [result.renda, result.fx_poder_aquisitivo, result.poder_aquisitivo].some(hasBadgeValue) ? 1 : 0;
     const dadosBasicosBadgeCount = [
       result.cpf,
       result.nome,
@@ -3660,11 +3670,11 @@ Todos os direitos reservados.`;
       result.uf_emissao,
       result.data_obito,
       result.titulo_eleitor,
-    ].some(hasValue)
+    ].some(hasBadgeValue)
       ? 1
       : 0;
-    const tituloEleitorBadgeCount = [result.titulo_eleitor, result.zona, result.secao].some(hasValue) ? 1 : 0;
-    const pisBadgeCount = hasValue(result.pis) ? 1 : 0;
+    const tituloEleitorBadgeCount = [result.titulo_eleitor, result.zona, result.secao].some(hasBadgeValue) ? 1 : 0;
+    const pisBadgeCount = hasBadgeValue(result.pis) ? 1 : 0;
 
     const share = await tempConsultationShareService.createTemporaryShare({
       cpf: result.cpf,
