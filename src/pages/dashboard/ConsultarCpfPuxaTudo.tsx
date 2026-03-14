@@ -3636,6 +3636,46 @@ Todos os direitos reservados.`;
       throw new Error('Não foi possível gerar os dados para compartilhamento.');
     }
 
+    const sharedResultData = {
+      ...result,
+      auxilio_emergencial: auxiliosEmergenciais,
+      rais_historico: rais,
+    };
+
+    const hasBadgeValue = (value: unknown) => {
+      if (value === null || value === undefined) return false;
+      if (typeof value === 'string') {
+        const normalized = value.trim().toUpperCase();
+        return normalized !== '' && normalized !== '-' && normalized !== 'SEM RESULTADO' && normalized !== 'SEM DADOS';
+      }
+      if (Array.isArray(value)) return value.length > 0;
+      return true;
+    };
+
+    const scoreBadgeCount = hasBadgeValue(result.score) ? 1 : 0;
+    const csb8BadgeCount = hasBadgeValue(result.csb8) || hasBadgeValue(result.csb8_faixa) ? 1 : 0;
+    const csbaBadgeCount = hasBadgeValue(result.csba) || hasBadgeValue(result.csba_faixa) ? 1 : 0;
+    const dadosFinanceirosBadgeCount = [result.renda, result.fx_poder_aquisitivo, result.poder_aquisitivo].some(hasBadgeValue) ? 1 : 0;
+    const dadosBasicosBadgeCount = [
+      result.cpf,
+      result.nome,
+      result.data_nascimento,
+      result.sexo,
+      result.mae || result.nome_mae,
+      result.pai || result.nome_pai,
+      result.estado_civil,
+      result.rg,
+      result.cbo,
+      result.orgao_emissor,
+      result.uf_emissao,
+      result.data_obito,
+      result.titulo_eleitor,
+    ].some(hasBadgeValue)
+      ? 1
+      : 0;
+    const tituloEleitorBadgeCount = [result.titulo_eleitor, result.zona, result.secao].some(hasBadgeValue) ? 1 : 0;
+    const pisBadgeCount = hasBadgeValue(result.pis) ? 1 : 0;
+
     const share = await tempConsultationShareService.createTemporaryShare({
       cpf: result.cpf,
       payload: {
@@ -3643,7 +3683,38 @@ Todos os direitos reservados.`;
         cpf: result.cpf,
         nome: result.nome,
         generated_at: new Date().toISOString(),
-        result_data: result,
+        result_data: sharedResultData,
+        badge_counts: {
+          '#fotos-section': fotosCount,
+          '#score-section': scoreBadgeCount,
+          '#csb8-section': csb8BadgeCount,
+          '#csba-section': csbaBadgeCount,
+          '#dados-financeiros-section': dadosFinanceirosBadgeCount,
+          '#dados-basicos-section': dadosBasicosBadgeCount,
+          '#telefones-section': telefonesCount,
+          '#emails-section': emailsCount,
+          '#enderecos-section': enderecosCount,
+          '#titulo-eleitor-section': tituloEleitorBadgeCount,
+          '#parentes-section': parentesCount,
+          '#certidao-nascimento-section': certidaoNascimentoCount,
+          '#documento-section': documentoCount,
+          '#cns-section': cnsCount,
+          '#pis-section': pisBadgeCount,
+          '#vacinas-section': vacinasCount,
+          '#empresas-socio-section': empresasSocioCount,
+          '#cnpj-mei-section': cnpjMeiCount,
+          '#dividas-ativas-section': dividasAtivasCount,
+          '#auxilio-emergencial-section': auxiliosEmergenciais?.length ?? 0,
+          '#rais-section': rais?.length ?? 0,
+          '#inss-section': inssCount,
+          '#claro-section': claroCount,
+          '#vivo-section': vivoCount,
+          '#tim-section': timCount,
+          '#oi-section': oiCount,
+          '#senhas-email-section': senhaEmailCount,
+          '#senhas-cpf-section': senhaCpfCount,
+          '#gestao-cadastral-section': gestaoCount,
+        },
         report_text: reportText,
       },
     });

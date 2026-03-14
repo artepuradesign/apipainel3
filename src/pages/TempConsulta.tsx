@@ -7,35 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, CheckCircle, Clock3, DollarSign, FileText, User } from 'lucide-react';
+import { AlertCircle, Camera, CheckCircle, Clock3, DollarSign, FileText, User } from 'lucide-react';
 import { tempConsultationShareService } from '@/services/tempConsultationShareService';
 import type { BaseAuxilioEmergencial } from '@/services/baseAuxilioEmergencialService';
 import type { BaseRais } from '@/services/baseRaisService';
-import FotosSection from '@/components/dashboard/FotosSection';
 import ScoreGaugeCard from '@/components/dashboard/ScoreGaugeCard';
-import TelefonesSection from '@/components/dashboard/TelefonesSection';
-import EmailsSection from '@/components/dashboard/EmailsSection';
-import EnderecosSection from '@/components/dashboard/EnderecosSection';
-import ParentesSection from '@/components/dashboard/ParentesSection';
-import CertidaoNascimentoSection from '@/components/dashboard/CertidaoNascimentoSection';
-import DocumentoSection from '@/components/dashboard/DocumentoSection';
-import CnsSection from '@/components/dashboard/CnsSection';
 import PisSection from '@/components/dashboard/PisSection';
-import VacinaDisplay from '@/components/vacina/VacinaDisplay';
-import EmpresasSocioSection from '@/components/dashboard/EmpresasSocioSection';
-import CnpjMeiSection from '@/components/dashboard/CnpjMeiSection';
-import DividasAtivasSection from '@/components/dashboard/DividasAtivasSection';
 import { AuxilioEmergencialSection } from '@/components/dashboard/AuxilioEmergencialSection';
 import { RaisSection } from '@/components/dashboard/RaisSection';
-import InssSection from '@/components/dashboard/InssSection';
-import ClaroSection from '@/components/dashboard/ClaroSection';
-import VivoSection from '@/components/dashboard/VivoSection';
-import OperadoraTimSection from '@/components/dashboard/OperadoraTimSection';
-import OperadoraOiSection from '@/components/dashboard/OperadoraOiSection';
-import SenhaEmailSection from '@/components/dashboard/SenhaEmailSection';
-import SenhaCpfSection from '@/components/dashboard/SenhaCpfSection';
-import BoletimOcorrenciaBoSection from '@/components/dashboard/BoletimOcorrenciaBoSection';
-import GestaoSection from '@/components/dashboard/GestaoSection';
+
+type SharedRecord = Record<string, unknown>;
 
 const extractShareKey = (search: string) => {
   const params = new URLSearchParams(search);
@@ -73,6 +54,12 @@ const parseArrayData = <T = unknown,>(value: unknown): T[] => {
   return [];
 };
 
+const normalizeCollection = (value: unknown): SharedRecord[] =>
+  parseArrayData<SharedRecord>(value).filter((item) => {
+    if (!item || typeof item !== 'object') return false;
+    return Object.values(item).some(hasValue);
+  });
+
 const formatRenda = (value: unknown) => {
   if (!hasValue(value)) return '';
   if (typeof value === 'number') {
@@ -106,41 +93,103 @@ const formatCountdown = (ms: number) => {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
+const formatFieldLabel = (key: string) =>
+  key
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^./, (char) => char.toUpperCase());
+
+const normalizePhotoUrl = (value: string) => {
+  const raw = value.trim();
+  if (!raw) return '';
+
+  const first = raw.split(',')[0]?.trim() || '';
+  const normalized = first.replace(/^\/+/, '');
+
+  if (/^https?:\/\//i.test(normalized)) return normalized;
+  if (/^api\.apipainel\.com\.br\//i.test(normalized)) return `https://${normalized}`;
+  if (/^(fotos|base-foto)\//i.test(normalized)) return `https://api.apipainel.com.br/${normalized}`;
+
+  return `https://api.apipainel.com.br/fotos/${normalized}`;
+};
+
+interface SharedCollectionSectionProps {
+  id: string;
+  title: string;
+  items: SharedRecord[];
+}
+
+const SharedCollectionSection: React.FC<SharedCollectionSectionProps> = ({ id, title, items }) => {
+  if (items.length === 0) return null;
+
+  return (
+    <Card id={id} className="border-success-border bg-success-subtle">
+      <CardHeader className="p-4 md:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base sm:text-lg lg:text-xl">{title}</CardTitle>
+          <div className="relative inline-flex">
+            <Badge variant="secondary" className="uppercase tracking-wide">Online</Badge>
+            <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground ring-1 ring-background">
+              {items.length}
+            </span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3 p-4 md:p-6">
+        {items.map((item, index) => {
+          const fields = Object.entries(item).filter(([, value]) => hasValue(value));
+          return (
+            <div key={`${id}-${index}`} className="rounded-md border bg-card p-3 md:p-4">
+              <p className="text-sm font-semibold mb-2">Registro {index + 1}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                {fields.map(([key, value]) => (
+                  <div key={`${id}-${index}-${key}`} className="min-w-0">
+                    <span className="text-muted-foreground">{formatFieldLabel(key)}:</span>{' '}
+                    <span className="break-words">{String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+};
+
 const TempConsulta = () => {
   const { search } = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareData, setShareData] = useState<any>(null);
-
-  const [telefonesCount, setTelefonesCount] = useState(0);
-  const [emailsCount, setEmailsCount] = useState(0);
-  const [enderecosCount, setEnderecosCount] = useState(0);
-  const [parentesCount, setParentesCount] = useState(0);
-  const [certidaoNascimentoCount, setCertidaoNascimentoCount] = useState(0);
-  const [documentoCount, setDocumentoCount] = useState(0);
-  const [cnsCount, setCnsCount] = useState(0);
-  const [vacinasCount, setVacinasCount] = useState(0);
-  const [empresasSocioCount, setEmpresasSocioCount] = useState(0);
-  const [cnpjMeiCount, setCnpjMeiCount] = useState(0);
-  const [dividasAtivasCount, setDividasAtivasCount] = useState(0);
-  const [inssCount, setInssCount] = useState(0);
-  const [claroCount, setClaroCount] = useState(0);
-  const [vivoCount, setVivoCount] = useState(0);
-  const [timCount, setTimCount] = useState(0);
-  const [oiCount, setOiCount] = useState(0);
-  const [senhaEmailCount, setSenhaEmailCount] = useState(0);
-  const [senhaCpfCount, setSenhaCpfCount] = useState(0);
-  const [gestaoCount, setGestaoCount] = useState(0);
-  const [boCount, setBoCount] = useState(0);
   const [countdown, setCountdown] = useState('');
 
   const key = useMemo(() => extractShareKey(search), [search]);
   const sharedPayload = shareData?.payload;
   const sharedResult = sharedPayload?.result_data || null;
+  const sharedBadgeCounts = (sharedPayload?.badge_counts || {}) as Record<string, number>;
 
-  const cpfId = Number(sharedResult?.id);
-  const hasCpfId = Number.isFinite(cpfId) && cpfId > 0;
   const hasCpfValue = hasValue(sharedResult?.cpf);
+
+  const telefonesData = useMemo(() => normalizeCollection(sharedResult?.telefones), [sharedResult?.telefones]);
+  const emailsData = useMemo(() => normalizeCollection(sharedResult?.emails), [sharedResult?.emails]);
+  const enderecosData = useMemo(() => normalizeCollection(sharedResult?.enderecos), [sharedResult?.enderecos]);
+  const parentesData = useMemo(() => normalizeCollection(sharedResult?.parentes), [sharedResult?.parentes]);
+  const certidaoData = useMemo(() => normalizeCollection(sharedResult?.certidao_nascimento || sharedResult?.certidoes), [sharedResult?.certidao_nascimento, sharedResult?.certidoes]);
+  const documentoData = useMemo(() => normalizeCollection(sharedResult?.documentos), [sharedResult?.documentos]);
+  const cnsData = useMemo(() => normalizeCollection(sharedResult?.cns_dados), [sharedResult?.cns_dados]);
+  const vacinasData = useMemo(() => normalizeCollection(sharedResult?.vacinas_covid), [sharedResult?.vacinas_covid]);
+  const empresasSocioData = useMemo(() => normalizeCollection(sharedResult?.empresas_socio), [sharedResult?.empresas_socio]);
+  const dividasAtivasData = useMemo(() => normalizeCollection(sharedResult?.dividas_ativas), [sharedResult?.dividas_ativas]);
+  const inssData = useMemo(() => normalizeCollection(sharedResult?.inss_dados), [sharedResult?.inss_dados]);
+  const claroData = useMemo(() => normalizeCollection(sharedResult?.operadora_claro), [sharedResult?.operadora_claro]);
+  const vivoData = useMemo(() => normalizeCollection(sharedResult?.operadora_vivo), [sharedResult?.operadora_vivo]);
+  const timData = useMemo(() => normalizeCollection(sharedResult?.operadora_tim), [sharedResult?.operadora_tim]);
+  const oiData = useMemo(() => normalizeCollection(sharedResult?.operadora_oi), [sharedResult?.operadora_oi]);
+  const senhasEmailData = useMemo(() => normalizeCollection(sharedResult?.senhas_vazadas_email), [sharedResult?.senhas_vazadas_email]);
+  const senhasCpfData = useMemo(() => normalizeCollection(sharedResult?.senhas_vazadas_cpf), [sharedResult?.senhas_vazadas_cpf]);
+  const gestaoData = useMemo(() => normalizeCollection(sharedResult?.gestao_cadastral), [sharedResult?.gestao_cadastral]);
 
   const auxiliosEmergenciais = useMemo(
     () => parseArrayData<BaseAuxilioEmergencial>(sharedResult?.auxilio_emergencial),
@@ -186,73 +235,108 @@ const TempConsulta = () => {
     [sharedResult]
   );
 
+  const documentoFields = useMemo(
+    () => [
+      { label: 'RG', value: sharedResult?.rg },
+      { label: 'Órgão Emissor', value: sharedResult?.orgao_emissor },
+      { label: 'UF Emissão', value: sharedResult?.uf_emissao },
+      { label: 'CTPS', value: sharedResult?.ctps },
+      { label: 'NIT', value: sharedResult?.nit },
+      { label: 'Passaporte', value: sharedResult?.passaporte },
+    ].filter((field) => hasValue(field.value)),
+    [sharedResult]
+  );
+
+  const cnsFields = useMemo(
+    () => [
+      { label: 'CNS', value: sharedResult?.cns },
+      { label: 'NSU', value: sharedResult?.nsu },
+    ].filter((field) => hasValue(field.value)),
+    [sharedResult]
+  );
+
+  const cnpjMeiValue = sharedResult?.cnpj_mei;
+
+  const photoUrls = useMemo(() => {
+    const fromSingles = [sharedResult?.foto, sharedResult?.foto2].filter((value): value is string => typeof value === 'string' && value.trim() !== '');
+    const fromArray = normalizeCollection(sharedResult?.fotos || sharedResult?.base_foto)
+      .map((item) => (typeof item.photo === 'string' ? item.photo : ''))
+      .filter((value): value is string => value.trim() !== '');
+
+    return [...new Set([...fromSingles, ...fromArray].map(normalizePhotoUrl).filter(Boolean))];
+  }, [sharedResult?.foto, sharedResult?.foto2, sharedResult?.fotos, sharedResult?.base_foto]);
+
   const badgeCounts = useMemo(() => {
-    const fotosCount = Number(hasValue(sharedResult?.foto)) + Number(hasValue(sharedResult?.foto2));
+    const fallback = (href: string, current: number) => {
+      const fromShared = Number(sharedBadgeCounts[href]);
+      return Number.isFinite(fromShared) && fromShared > 0 ? fromShared : current;
+    };
+
     const scoreCount = hasValue(sharedResult?.score) ? 1 : 0;
     const csb8Count = hasValue(sharedResult?.csb8) || hasValue(sharedResult?.csb8_faixa) ? 1 : 0;
     const csbaCount = hasValue(sharedResult?.csba) || hasValue(sharedResult?.csba_faixa) ? 1 : 0;
-    const dadosFinanceirosCount = hasDadosFinanceiros ? 1 : 0;
-    const dadosBasicosCount = hasDadosBasicos ? 1 : 0;
-    const tituloEleitorCount = hasTituloEleitor ? 1 : 0;
-    const pisCount = hasValue(sharedResult?.pis) ? 1 : 0;
 
     return {
-      '#fotos-section': fotosCount,
-      '#score-section': scoreCount,
-      '#csb8-section': csb8Count,
-      '#csba-section': csbaCount,
-      '#dados-financeiros-section': dadosFinanceirosCount,
-      '#dados-basicos-section': dadosBasicosCount,
-      '#telefones-section': telefonesCount,
-      '#emails-section': emailsCount,
-      '#enderecos-section': enderecosCount,
-      '#titulo-eleitor-section': tituloEleitorCount,
-      '#parentes-section': parentesCount,
-      '#certidao-nascimento-section': certidaoNascimentoCount,
-      '#documento-section': documentoCount,
-      '#cns-section': cnsCount,
-      '#pis-section': pisCount,
-      '#vacinas-section': vacinasCount,
-      '#empresas-socio-section': empresasSocioCount,
-      '#cnpj-mei-section': cnpjMeiCount,
-      '#dividas-ativas-section': dividasAtivasCount,
-      '#auxilio-emergencial-section': auxiliosEmergenciais.length,
-      '#rais-section': raisData.length,
-      '#inss-section': inssCount,
-      '#claro-section': claroCount,
-      '#vivo-section': vivoCount,
-      '#tim-section': timCount,
-      '#oi-section': oiCount,
-      '#senhas-email-section': senhaEmailCount,
-      '#senhas-cpf-section': senhaCpfCount,
-      '#gestao-cadastral-section': gestaoCount,
+      '#fotos-section': fallback('#fotos-section', photoUrls.length),
+      '#score-section': fallback('#score-section', scoreCount),
+      '#csb8-section': fallback('#csb8-section', csb8Count),
+      '#csba-section': fallback('#csba-section', csbaCount),
+      '#dados-financeiros-section': fallback('#dados-financeiros-section', hasDadosFinanceiros ? 1 : 0),
+      '#dados-basicos-section': fallback('#dados-basicos-section', hasDadosBasicos ? 1 : 0),
+      '#telefones-section': fallback('#telefones-section', telefonesData.length),
+      '#emails-section': fallback('#emails-section', emailsData.length),
+      '#enderecos-section': fallback('#enderecos-section', enderecosData.length),
+      '#titulo-eleitor-section': fallback('#titulo-eleitor-section', hasTituloEleitor ? 1 : 0),
+      '#parentes-section': fallback('#parentes-section', parentesData.length),
+      '#certidao-nascimento-section': fallback('#certidao-nascimento-section', certidaoData.length),
+      '#documento-section': fallback('#documento-section', documentoData.length || (documentoFields.length > 0 ? 1 : 0)),
+      '#cns-section': fallback('#cns-section', cnsData.length || (cnsFields.length > 0 ? 1 : 0)),
+      '#pis-section': fallback('#pis-section', hasValue(sharedResult?.pis) ? 1 : 0),
+      '#vacinas-section': fallback('#vacinas-section', vacinasData.length),
+      '#empresas-socio-section': fallback('#empresas-socio-section', empresasSocioData.length),
+      '#cnpj-mei-section': fallback('#cnpj-mei-section', hasValue(cnpjMeiValue) ? 1 : 0),
+      '#dividas-ativas-section': fallback('#dividas-ativas-section', dividasAtivasData.length),
+      '#auxilio-emergencial-section': fallback('#auxilio-emergencial-section', auxiliosEmergenciais.length),
+      '#rais-section': fallback('#rais-section', raisData.length),
+      '#inss-section': fallback('#inss-section', inssData.length),
+      '#claro-section': fallback('#claro-section', claroData.length),
+      '#vivo-section': fallback('#vivo-section', vivoData.length),
+      '#tim-section': fallback('#tim-section', timData.length),
+      '#oi-section': fallback('#oi-section', oiData.length),
+      '#senhas-email-section': fallback('#senhas-email-section', senhasEmailData.length),
+      '#senhas-cpf-section': fallback('#senhas-cpf-section', senhasCpfData.length),
+      '#gestao-cadastral-section': fallback('#gestao-cadastral-section', gestaoData.length),
     } as Record<string, number>;
   }, [
+    sharedBadgeCounts,
     sharedResult,
     hasDadosFinanceiros,
     hasDadosBasicos,
     hasTituloEleitor,
-    telefonesCount,
-    emailsCount,
-    enderecosCount,
-    parentesCount,
-    certidaoNascimentoCount,
-    documentoCount,
-    cnsCount,
-    vacinasCount,
-    empresasSocioCount,
-    cnpjMeiCount,
-    dividasAtivasCount,
+    photoUrls.length,
+    telefonesData.length,
+    emailsData.length,
+    enderecosData.length,
+    parentesData.length,
+    certidaoData.length,
+    documentoData.length,
+    documentoFields.length,
+    cnsData.length,
+    cnsFields.length,
+    vacinasData.length,
+    empresasSocioData.length,
+    cnpjMeiValue,
+    dividasAtivasData.length,
     auxiliosEmergenciais.length,
     raisData.length,
-    inssCount,
-    claroCount,
-    vivoCount,
-    timCount,
-    oiCount,
-    senhaEmailCount,
-    senhaCpfCount,
-    gestaoCount,
+    inssData.length,
+    claroData.length,
+    vivoData.length,
+    timData.length,
+    oiData.length,
+    senhasEmailData.length,
+    senhasCpfData.length,
+    gestaoData.length,
   ]);
 
   const onlineBadges = useMemo(
@@ -371,9 +455,7 @@ const TempConsulta = () => {
                     <span className="inline-flex items-center gap-1 text-xs md:text-sm text-success-subtle-foreground">
                       <Clock3 className="h-4 w-4" />
                       Expira em: {new Date(shareData.expires_at).toLocaleString('pt-BR')}
-                      {countdown ? (
-                        <span className="inline-block min-w-[92px] text-right font-bold tabular-nums">({countdown})</span>
-                      ) : null}
+                      {countdown ? <span className="inline-block min-w-[92px] text-right font-bold tabular-nums">({countdown})</span> : null}
                     </span>
                   </div>
                 </CardHeader>
@@ -406,11 +488,35 @@ const TempConsulta = () => {
                 </CardContent>
               </Card>
 
-              {hasCpfId && hasCpfValue ? (
+              {hasCpfValue ? (
                 <>
-                  <div id="fotos-section">
-                    <FotosSection cpfId={cpfId} cpfNumber={String(sharedResult.cpf)} onCountChange={() => undefined} canManage={false} />
-                  </div>
+                  {photoUrls.length > 0 && (
+                    <Card id="fotos-section" className="border-success-border bg-success-subtle">
+                      <CardHeader>
+                        <div className="flex items-center justify-between gap-3">
+                          <CardTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl min-w-0">
+                            <Camera className="h-5 w-5 flex-shrink-0" />
+                            <span className="truncate">Fotos</span>
+                          </CardTitle>
+                          <div className="relative inline-flex">
+                            <Badge variant="secondary" className="uppercase tracking-wide">Online</Badge>
+                            <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground ring-1 ring-background">
+                              {photoUrls.length}
+                            </span>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 md:p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {photoUrls.map((url, index) => (
+                            <a key={`${url}-${index}`} href={url} target="_blank" rel="noreferrer" className="block rounded-md overflow-hidden border bg-card">
+                              <img src={url} alt={`Foto ${index + 1}`} className="w-full aspect-[3/4] object-cover" loading="lazy" />
+                            </a>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {(hasValue(sharedResult?.score) || hasValue(sharedResult?.csb8) || hasValue(sharedResult?.csba)) && (
                     <section className="mx-auto w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -499,40 +605,14 @@ const TempConsulta = () => {
                             <Label className="text-xs sm:text-sm" htmlFor="data_nascimento">Data de Nascimento</Label>
                             <Input id="data_nascimento" value={sharedResult.data_nascimento ? formatDateOnly(sharedResult.data_nascimento) : ''} disabled className="bg-muted text-[14px] md:text-sm" />
                           </div>
-                          {hasValue(sharedResult?.sexo) && (
-                            <div>
-                              <Label className="text-xs sm:text-sm" htmlFor="sexo">Sexo</Label>
-                              <Input id="sexo" value={String(sharedResult.sexo).toUpperCase()} disabled className="bg-muted text-[14px] md:text-sm" />
-                            </div>
-                          )}
-                          {hasValue(sharedResult?.mae || sharedResult?.nome_mae) && (
-                            <div>
-                              <Label className="text-xs sm:text-sm" htmlFor="mae">Nome da Mãe</Label>
-                              <Input id="mae" value={(sharedResult.mae || sharedResult.nome_mae || '').toUpperCase()} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
-                            </div>
-                          )}
-                          {hasValue(sharedResult?.pai || sharedResult?.nome_pai) && (
-                            <div>
-                              <Label className="text-xs sm:text-sm" htmlFor="pai">Nome do Pai</Label>
-                              <Input id="pai" value={(sharedResult.pai || sharedResult.nome_pai || '').toUpperCase()} disabled className="bg-muted uppercase text-[14px] md:text-sm" />
-                            </div>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
                   )}
 
-                  <div id="telefones-section" className={telefonesCount === 0 ? 'hidden' : ''}>
-                    <TelefonesSection cpfId={cpfId} onCountChange={setTelefonesCount} />
-                  </div>
-
-                  <div id="emails-section" className={emailsCount === 0 ? 'hidden' : ''}>
-                    <EmailsSection cpfId={cpfId} onCountChange={setEmailsCount} />
-                  </div>
-
-                  <div id="enderecos-section" className={enderecosCount === 0 ? 'hidden' : ''}>
-                    <EnderecosSection cpfId={cpfId} onCountChange={setEnderecosCount} />
-                  </div>
+                  <SharedCollectionSection id="telefones-section" title="Telefones" items={telefonesData} />
+                  <SharedCollectionSection id="emails-section" title="Emails" items={emailsData} />
+                  <SharedCollectionSection id="enderecos-section" title="Endereços" items={enderecosData} />
 
                   {hasTituloEleitor && (
                     <Card id="titulo-eleitor-section" className="border-success-border bg-success-subtle">
@@ -567,43 +647,65 @@ const TempConsulta = () => {
                     </Card>
                   )}
 
-                  <div id="parentes-section" className={parentesCount === 0 ? 'hidden' : ''}>
-                    <ParentesSection cpfId={cpfId} onCountChange={setParentesCount} />
-                  </div>
+                  <SharedCollectionSection id="parentes-section" title="Parentes" items={parentesData} />
+                  <SharedCollectionSection id="certidao-nascimento-section" title="Certidão de Nascimento" items={certidaoData} />
+                  <SharedCollectionSection id="documento-section" title="Documento" items={documentoData} />
 
-                  <div id="certidao-nascimento-section" className={certidaoNascimentoCount === 0 ? 'hidden' : ''}>
-                    <CertidaoNascimentoSection cpfId={cpfId} onCountChange={setCertidaoNascimentoCount} />
-                  </div>
+                  {!documentoData.length && documentoFields.length > 0 && (
+                    <Card id="documento-section" className="border-success-border bg-success-subtle">
+                      <CardHeader>
+                        <CardTitle className="text-base sm:text-lg lg:text-xl">Documento</CardTitle>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {documentoFields.map((field) => (
+                          <div key={field.label}>
+                            <Label>{field.label}</Label>
+                            <Input value={String(field.value)} disabled className="bg-muted" />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
 
-                  <div id="documento-section" className={documentoCount === 0 ? 'hidden' : ''}>
-                    <DocumentoSection cpfId={cpfId} onCountChange={setDocumentoCount} />
-                  </div>
+                  <SharedCollectionSection id="cns-section" title="CNS" items={cnsData} />
 
-                  <div id="cns-section" className={cnsCount === 0 ? 'hidden' : ''}>
-                    <CnsSection cpfId={cpfId} onCountChange={setCnsCount} />
-                  </div>
+                  {!cnsData.length && cnsFields.length > 0 && (
+                    <Card id="cns-section" className="border-success-border bg-success-subtle">
+                      <CardHeader>
+                        <CardTitle className="text-base sm:text-lg lg:text-xl">CNS</CardTitle>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {cnsFields.map((field) => (
+                          <div key={field.label}>
+                            <Label>{field.label}</Label>
+                            <Input value={String(field.value)} disabled className="bg-muted" />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
 
-                  {(hasValue(sharedResult?.pis)) && (
+                  {hasValue(sharedResult?.pis) && (
                     <div id="pis-section">
                       <PisSection pis={sharedResult.pis} />
                     </div>
                   )}
 
-                  <div id="vacinas-section" className={vacinasCount === 0 ? 'hidden' : ''}>
-                    <VacinaDisplay cpfId={cpfId} onCountChange={setVacinasCount} />
-                  </div>
+                  <SharedCollectionSection id="vacinas-section" title="Vacinas" items={vacinasData} />
+                  <SharedCollectionSection id="empresas-socio-section" title="Empresas Associadas (SÓCIO)" items={empresasSocioData} />
 
-                  <div id="empresas-socio-section" className={empresasSocioCount === 0 ? 'hidden' : ''}>
-                    <EmpresasSocioSection cpfId={cpfId} onCountChange={setEmpresasSocioCount} />
-                  </div>
+                  {hasValue(cnpjMeiValue) && (
+                    <Card id="cnpj-mei-section" className="border-success-border bg-success-subtle">
+                      <CardHeader>
+                        <CardTitle className="text-base sm:text-lg lg:text-xl">CNPJ MEI</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Input value={String(cnpjMeiValue)} disabled className="bg-muted" />
+                      </CardContent>
+                    </Card>
+                  )}
 
-                  <div id="cnpj-mei-section" className={cnpjMeiCount === 0 ? 'hidden' : ''}>
-                    <CnpjMeiSection cpfId={cpfId} onCountChange={setCnpjMeiCount} />
-                  </div>
-
-                  <div id="dividas-ativas-section" className={dividasAtivasCount === 0 ? 'hidden' : ''}>
-                    <DividasAtivasSection cpf={String(cpfId)} onCountChange={setDividasAtivasCount} />
-                  </div>
+                  <SharedCollectionSection id="dividas-ativas-section" title="Dívidas Ativas (SIDA)" items={dividasAtivasData} />
 
                   {auxiliosEmergenciais.length > 0 && (
                     <div id="auxilio-emergencial-section">
@@ -617,41 +719,14 @@ const TempConsulta = () => {
                     </div>
                   )}
 
-                  <div id="inss-section" className={inssCount === 0 ? 'hidden' : ''}>
-                    <InssSection cpfId={cpfId} onCountChange={setInssCount} />
-                  </div>
-
-                  <div id="claro-section" className={claroCount === 0 ? 'hidden' : ''}>
-                    <ClaroSection cpfId={cpfId} onCountChange={setClaroCount} />
-                  </div>
-
-                  <div id="vivo-section" className={vivoCount === 0 ? 'hidden' : ''}>
-                    <VivoSection cpfId={cpfId} onCountChange={setVivoCount} />
-                  </div>
-
-                  <div id="tim-section" className={timCount === 0 ? 'hidden' : ''}>
-                    <OperadoraTimSection cpfId={cpfId} onCountChange={setTimCount} />
-                  </div>
-
-                  <div id="oi-section" className={oiCount === 0 ? 'hidden' : ''}>
-                    <OperadoraOiSection cpfId={cpfId} onCountChange={setOiCount} />
-                  </div>
-
-                  <div id="senhas-email-section" className={senhaEmailCount === 0 ? 'hidden' : ''}>
-                    <SenhaEmailSection cpfId={cpfId} onCountChange={setSenhaEmailCount} />
-                  </div>
-
-                  <div id="senhas-cpf-section" className={senhaCpfCount === 0 ? 'hidden' : ''}>
-                    <SenhaCpfSection cpfId={cpfId} onCountChange={setSenhaCpfCount} />
-                  </div>
-
-                  <div id="boletim-ocorrencia-section" className={boCount === 0 ? 'hidden' : ''}>
-                    <BoletimOcorrenciaBoSection cpfId={cpfId} onCountChange={setBoCount} />
-                  </div>
-
-                  <div id="gestao-cadastral-section" className={gestaoCount === 0 ? 'hidden' : ''}>
-                    <GestaoSection cpfId={cpfId} onCountChange={setGestaoCount} />
-                  </div>
+                  <SharedCollectionSection id="inss-section" title="INSS" items={inssData} />
+                  <SharedCollectionSection id="claro-section" title="Operadora Claro" items={claroData} />
+                  <SharedCollectionSection id="vivo-section" title="Operadora Vivo" items={vivoData} />
+                  <SharedCollectionSection id="tim-section" title="Operadora TIM" items={timData} />
+                  <SharedCollectionSection id="oi-section" title="Operadora OI" items={oiData} />
+                  <SharedCollectionSection id="senhas-email-section" title="Senhas de Email" items={senhasEmailData} />
+                  <SharedCollectionSection id="senhas-cpf-section" title="Senhas de CPF" items={senhasCpfData} />
+                  <SharedCollectionSection id="gestao-cadastral-section" title="Gestão Cadastral" items={gestaoData} />
                 </>
               ) : (
                 <Card>
